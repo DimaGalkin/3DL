@@ -36,6 +36,7 @@ void ThreeDL::Object::fillTextureBuffer(const std::string& texture_path) {
     }
 
     std::vector<uint32_t> tex_data;
+    tex_data.resize(texture->w * texture->h);
     texture_.resize(texture->w * texture->h);
 
     for (int i = 0; i < texture->w; ++i) {
@@ -173,10 +174,6 @@ std::vector<Triangle> ThreeDL::OBJLoader::load(const std::string& path) {
             );
         }
     }
-
-    vertices.clear();
-    uvs.clear();
-    normals.clear();
 
     return triangles;
 }

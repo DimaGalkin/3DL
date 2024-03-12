@@ -9,6 +9,7 @@
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_sdlrenderer2.h>
 
+#include <iostream>
 #include <vector>
 
 #include "camera.hpp"
@@ -35,7 +36,7 @@ namespace ThreeDL {
 
     class Renderer {
         public:
-            Renderer(const Camera& camera, const uint32_t width, const uint32_t height);
+            Renderer(Camera& camera, const uint32_t width, const uint32_t height);
             Renderer() = delete;
 
             void add(const Object* object);
@@ -47,9 +48,9 @@ namespace ThreeDL {
 
             ~Renderer();
         private:
-            const SDL_Renderer* renderer_;
-            const SDL_Window* window_;
-            const SDL_Surface* pixels_surface_;
+            SDL_Renderer* renderer_;
+            SDL_Window* window_;
+            SDL_Surface* pixels_surface_;
             SDL_Texture* pixels_texture_;
 
             Camera& camera_;
@@ -63,18 +64,18 @@ namespace ThreeDL {
             uint64_t enabled_ticks_ = 0;
 
             std::vector<double> zbuffer_;
-            std::vector<Object*> render_queue_;
+            std::vector<const Object*> render_queue_;
 
             std::vector<GPULight> gpu_lights_;
-            std::vector<Light*> lights_;
+            std::vector<const Light*> lights_;
 
             OpenCLUtils ocl_utils_;
-            gpu_render_program render_program_;
-            gpu_lighting_program lighting_program_;
+            gpu_render_program render_program_ = cl::Kernel();
+            gpu_lighting_program lighting_program_ = cl::Kernel();
 
             cl::Buffer zbuffer_buffer_;
             cl::Buffer pixels_buffer_;
-            cl::Buffer scene_info_buffer_;
+            cl::Buffer state_buffer_;
             cl::Buffer triangles_buffer_;
             cl::Buffer texture_buffer_;
             cl::Buffer lights_buffer_;
@@ -83,6 +84,9 @@ namespace ThreeDL {
             cl::Buffer diffuse_buffer_;
             cl::Buffer specular_buffer_;
 
-            void renderObject(const Object& object);
+            bool renderObject(const Object& object);
+            void renderLoop();
+
+            static bool checkQuit();
     };
 };

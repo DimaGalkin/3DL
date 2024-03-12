@@ -30,7 +30,7 @@ std::string ThreeDL::OpenCLUtils::readKernel(const std::string& path) {
     std::ifstream kernel_file { path };
 
     if (!kernel_file.is_open()) {
-        throw std::runtime_error("Failed to open file for reading: " + filename);
+        throw std::runtime_error("Failed to open file for reading: " + path);
     }
 
     std::string kernel_source {std::istreambuf_iterator<char>(kernel_file), std::istreambuf_iterator<char>()};
@@ -49,7 +49,7 @@ cl::Program ThreeDL::OpenCLUtils::buildProgram(const std::string& kernel, const 
     cl::Program program (context_, sources);
 
     if (program.build(devices_) != CL_SUCCESS) {
-        throw std::runtime_error(program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(default_device_));
+        throw std::runtime_error(program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device_));
     }
 
     return program;

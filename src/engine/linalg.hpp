@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 #include "GPU/types.h"
 
 namespace ThreeDL {
@@ -15,7 +17,7 @@ namespace ThreeDL {
     class Vec3 {
         public:
             Vec3(double other_x, double other_y, double other_z);
-            explicit Vec3(const Vec3& other);
+            Vec3(const Vec3& other);
             Vec3();
 
             double x;
@@ -57,7 +59,7 @@ namespace ThreeDL {
     class Vec2 {
         public:
             Vec2(double other_x, double other_y);
-            explicit Vec2(const Vec2& other);
+            Vec2(const Vec2& other);
             Vec2();
 
             double x;

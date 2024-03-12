@@ -21,20 +21,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e70f4c67-2699-4309-8afe-84b89e908ee0" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/copilot/chatSessions/00000000000.xd" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/copilot/chatSessions/00000000000.xd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/copilot/chatSessions/xd.lck" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/copilot/chatSessions/xd.lck" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/.cmake/api/v1/reply/codemodel-v2-78180de5e071562732d2.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/.cmake/api/v1/reply/index-2024-03-12T02-09-11-0800.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/.cmake/api/v1/reply/target-3DL-Debug-4c41a39a535f2ae56fee.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/rules.ninja" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/rules.ninja" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/build.ninja" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/build.ninja" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/camera.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/camera.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/engine/camera.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/camera.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/GPU/openclutils.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/GPU/openclutils.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/lighting.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/lighting.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/lighting.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/lighting.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/linalg.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/linalg.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/engine/linalg.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/linalg.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/engine/objects.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/objects.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/engine/objects.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/objects.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/renderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/renderer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/engine/renderer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/renderer.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/engine/utils.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/utils.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/engine/utils.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/engine/utils.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -144,7 +147,8 @@
       <workItem from="1710190054384" duration="7910000" />
       <workItem from="1710207544115" duration="4957000" />
       <workItem from="1710242272721" duration="3465000" />
-      <workItem from="1710245880385" duration="1446000" />
+      <workItem from="1710245880385" duration="1599000" />
+      <workItem from="1710263402493" duration="7375000" />
     </task>
     <servers />
   </component>

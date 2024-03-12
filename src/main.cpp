@@ -9,8 +9,15 @@ int main(const int argc, const char** argv) {
     ThreeDL::AmbientLight ambient (0xffffff, 0.1);
     ThreeDL::PointLight point ({0, 50, -500}, 0xffffff, 0.5);
 
+    ThreeDL::Object object (
+        "src/f15.obj",
+        ThreeDL::FILEFORMAT::OBJ,
+        "src/f15.png"
+    );
+
     renderer.add(&ambient);
     renderer.add(&point);
+    renderer.add(&object);
     
     renderer.begin();
 

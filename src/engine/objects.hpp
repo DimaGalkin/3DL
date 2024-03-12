@@ -30,7 +30,7 @@ namespace ThreeDL {
         public:
             Object(const std::string& model_path, const FILEFORMAT format, const std::string& texture_path);
             Object(const std::string& model_path, const FILEFORMAT ff, const uint32_t color);
-            Object() = delete;
+            Object() = default;
 
             vec3 position_;
             vec3 rotation_;
@@ -41,7 +41,7 @@ namespace ThreeDL {
             tribuf_t triangles_;
             texbuf_t texture_;
 
-            ~Object();
+            ~Object() = default;
         private:
             void fillTextureBuffer(const std::string& texture_path);
             void fillTextureBuffer(const uint32_t color);

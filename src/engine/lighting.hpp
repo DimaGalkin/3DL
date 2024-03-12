@@ -3,16 +3,18 @@
 #include "GPU/types.h"
 #include "linalg.hpp"
 #include "objects.hpp"
+#include "utils.hpp"
 
 namespace ThreeDL {
     class Light {
         public:
-            Light() = delete;
+            Light();
 
             GPULight asGPUType() const;
 
             Object model_;
 
+            LightType type_;
             vec3 position_;
             vec3 direction_;
             float intensity_;
@@ -34,7 +36,7 @@ namespace ThreeDL {
             PointLight(const vec3& position, unsigned int color, const float intensity);
             PointLight() = delete;
 
-            // Object model_ = Object("src/light.obj", FILEFORMAT::OBJ, 0xFFFFFF);
+            Object model_ = Object("src/light.obj", FILEFORMAT::OBJ, 0xFFFFFF);
 
             ~PointLight() = default;
     };
