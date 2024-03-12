@@ -43,13 +43,13 @@ namespace ThreeDL {
 
             Vec3 operator+(const Vec3& other) const;
             Vec3 operator-(const Vec3& other) const;
-            Vec3 operator*(const Vec3& other) const;
+            Vec3 operator*(const double other) const;
             Vec3 operator/(const Vec3& other) const;
 
-            Vec3 operator+=(const Vec3& other);
-            Vec3 operator-=(const Vec3& other);
-            Vec3 operator*=(const Vec3& other);
-            Vec3 operator/=(const Vec3& other);
+            void operator+=(const Vec3& other);
+            void operator-=(const Vec3& other);
+            void operator*=(const double other);
+            void operator/=(const Vec3& other);
 
             ~Vec3() = default;
     } typedef vec3;
@@ -75,13 +75,13 @@ namespace ThreeDL {
 
             Vec2 operator+(const Vec2& other) const;
             Vec2 operator-(const Vec2& other) const;
-            Vec2 operator*(const Vec2& other) const;
+            Vec2 operator*(const double other) const;
             Vec2 operator/(const Vec2& other) const;
 
-            Vec2 operator+=(const Vec2& other);
-            Vec2 operator-=(const Vec2& other);
-            Vec2 operator*=(const Vec2& other);
-            Vec2 operator/=(const Vec2& other);
+            void operator+=(const Vec2& other);
+            void operator-=(const Vec2& other);
+            void operator*=(const double other);
+            void operator/=(const Vec2& other);
 
             ~Vec2() = default;
     } typedef vec2;

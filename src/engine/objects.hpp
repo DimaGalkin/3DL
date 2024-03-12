@@ -10,6 +10,7 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
+#include <algorithm>
 #include <vector>
 #include "GPU/types.h"
 #include "linalg.hpp"
@@ -42,9 +43,6 @@ namespace ThreeDL {
 
             ~Object();
         private:
-            tri_allocator_t tri_alloc_;
-            tex_allocator_t tex_alloc_;
-
             void fillTextureBuffer(const std::string& texture_path);
             void fillTextureBuffer(const uint32_t color);
             void fillTriangleBuffer(const std::string& model_path, const FILEFORMAT format);

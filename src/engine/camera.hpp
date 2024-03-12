@@ -1,16 +1,15 @@
 #pragma once
 
-#define _USE_MATH_DEFINES // for intellisense
-#include <math.h>
-#include <stdint.h>
+#include <cmath>
+#include <cstdint>
 
 #include "linalg.hpp"
 
 namespace ThreeDL {
     class Camera {
         public:
-            Camera(const vec3 &position, const vec3 &rotation);
-            Camera(const vec3 &position, const vec3 &rotation, const double fov);
+            Camera(const vec3& position, const vec3& rotation);
+            Camera(const vec3& position, const vec3& rotation, const double fov);
             Camera() = delete;
 
             // expose internal vectors to allow user to perform custom calculations

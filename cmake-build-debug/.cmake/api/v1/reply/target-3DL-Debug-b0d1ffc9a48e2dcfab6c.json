@@ -25,7 +25,7 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 10,
+				"line" : 11,
 				"parent" : 0
 			},
 			{
@@ -44,6 +44,12 @@
 				"command" : 1,
 				"file" : 0,
 				"line" : 8,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 9,
 				"parent" : 0
 			}
 		]
@@ -70,6 +76,10 @@
 				{
 					"backtrace" : 4,
 					"path" : "/home/dima/Projects/3DL/include/SDL2"
+				},
+				{
+					"backtrace" : 5,
+					"path" : "/home/dima/Projects/3DL/src/engine/GPU"
 				}
 			],
 			"language" : "CXX",
@@ -99,34 +109,6 @@
 				123,
 				125,
 				127
-			]
-		},
-		{
-			"compileCommandFragments" : 
-			[
-				{
-					"fragment" : "-g -fdiagnostics-color=always"
-				}
-			],
-			"includes" : 
-			[
-				{
-					"backtrace" : 2,
-					"path" : "/home/dima/Projects/3DL/include"
-				},
-				{
-					"backtrace" : 3,
-					"path" : "/home/dima/Projects/3DL/include/imgui"
-				},
-				{
-					"backtrace" : 4,
-					"path" : "/home/dima/Projects/3DL/include/SDL2"
-				}
-			],
-			"language" : "C",
-			"sourceIndexes" : 
-			[
-				129
 			]
 		}
 	],
@@ -293,8 +275,7 @@
 				121,
 				123,
 				125,
-				127,
-				129
+				127
 			]
 		}
 	],
@@ -960,12 +941,6 @@
 			"backtrace" : 1,
 			"path" : "src/main.hpp",
 			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"compileGroupIndex" : 1,
-			"path" : "src/engine/GPU/kernel.c",
-			"sourceGroupIndex" : 1
 		}
 	],
 	"type" : "EXECUTABLE"

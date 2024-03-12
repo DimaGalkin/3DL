@@ -52,121 +52,114 @@ build cmake_object_order_depends_target_3DL: phony || CMakeFiles/3DL.dir
 build CMakeFiles/3DL.dir/include/imgui/imgui.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/include/imgui/imgui.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/include/imgui/imgui.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/include/imgui
 
 build CMakeFiles/3DL.dir/include/imgui/imgui_demo.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/include/imgui/imgui_demo.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/include/imgui/imgui_demo.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/include/imgui
 
 build CMakeFiles/3DL.dir/include/imgui/imgui_draw.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/include/imgui/imgui_draw.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/include/imgui/imgui_draw.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/include/imgui
 
 build CMakeFiles/3DL.dir/include/imgui/imgui_impl_opengl3.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/include/imgui/imgui_impl_opengl3.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/include/imgui/imgui_impl_opengl3.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/include/imgui
 
 build CMakeFiles/3DL.dir/include/imgui/imgui_impl_sdl2.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/include/imgui/imgui_impl_sdl2.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/include/imgui/imgui_impl_sdl2.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/include/imgui
 
 build CMakeFiles/3DL.dir/include/imgui/imgui_impl_sdlrenderer2.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/include/imgui/imgui_impl_sdlrenderer2.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/include/imgui/imgui_impl_sdlrenderer2.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/include/imgui
 
 build CMakeFiles/3DL.dir/include/imgui/imgui_tables.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/include/imgui/imgui_tables.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/include/imgui/imgui_tables.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/include/imgui
 
 build CMakeFiles/3DL.dir/include/imgui/imgui_widgets.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/include/imgui/imgui_widgets.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/include/imgui/imgui_widgets.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/include/imgui
 
 build CMakeFiles/3DL.dir/src/engine/GPU/openclutils.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/src/engine/GPU/openclutils.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/src/engine/GPU/openclutils.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/src/engine/GPU
 
 build CMakeFiles/3DL.dir/src/engine/camera.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/src/engine/camera.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/src/engine/camera.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/src/engine
 
 build CMakeFiles/3DL.dir/src/engine/lighting.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/src/engine/lighting.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/src/engine/lighting.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/src/engine
 
 build CMakeFiles/3DL.dir/src/engine/linalg.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/src/engine/linalg.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/src/engine/linalg.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/src/engine
 
 build CMakeFiles/3DL.dir/src/engine/objects.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/src/engine/objects.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/src/engine/objects.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/src/engine
 
 build CMakeFiles/3DL.dir/src/engine/renderer.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/src/engine/renderer.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/src/engine/renderer.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/src/engine
 
 build CMakeFiles/3DL.dir/src/engine/utils.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/src/engine/utils.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/src/engine/utils.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/src/engine
 
 build CMakeFiles/3DL.dir/src/main.cpp.o: CXX_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/src/main.cpp || cmake_object_order_depends_target_3DL
   DEP_FILE = CMakeFiles/3DL.dir/src/main.cpp.o.d
   FLAGS = -g -std=gnu++14 -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
+  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2 -I/home/dima/Projects/3DL/src/engine/GPU
   OBJECT_DIR = CMakeFiles/3DL.dir
   OBJECT_FILE_DIR = CMakeFiles/3DL.dir/src
-
-build CMakeFiles/3DL.dir/src/engine/GPU/kernel.c.o: C_COMPILER__3DL_unscanned_Debug /home/dima/Projects/3DL/src/engine/GPU/kernel.c || cmake_object_order_depends_target_3DL
-  DEP_FILE = CMakeFiles/3DL.dir/src/engine/GPU/kernel.c.o.d
-  FLAGS = -g -fdiagnostics-color=always
-  INCLUDES = -I/home/dima/Projects/3DL/include -I/home/dima/Projects/3DL/include/imgui -I/home/dima/Projects/3DL/include/SDL2
-  OBJECT_DIR = CMakeFiles/3DL.dir
-  OBJECT_FILE_DIR = CMakeFiles/3DL.dir/src/engine/GPU
 
 
 # =============================================================================
@@ -176,7 +169,7 @@ build CMakeFiles/3DL.dir/src/engine/GPU/kernel.c.o: C_COMPILER__3DL_unscanned_De
 #############################################
 # Link the executable 3DL
 
-build 3DL: CXX_EXECUTABLE_LINKER__3DL_Debug CMakeFiles/3DL.dir/include/imgui/imgui.cpp.o CMakeFiles/3DL.dir/include/imgui/imgui_demo.cpp.o CMakeFiles/3DL.dir/include/imgui/imgui_draw.cpp.o CMakeFiles/3DL.dir/include/imgui/imgui_impl_opengl3.cpp.o CMakeFiles/3DL.dir/include/imgui/imgui_impl_sdl2.cpp.o CMakeFiles/3DL.dir/include/imgui/imgui_impl_sdlrenderer2.cpp.o CMakeFiles/3DL.dir/include/imgui/imgui_tables.cpp.o CMakeFiles/3DL.dir/include/imgui/imgui_widgets.cpp.o CMakeFiles/3DL.dir/src/engine/GPU/openclutils.cpp.o CMakeFiles/3DL.dir/src/engine/camera.cpp.o CMakeFiles/3DL.dir/src/engine/lighting.cpp.o CMakeFiles/3DL.dir/src/engine/linalg.cpp.o CMakeFiles/3DL.dir/src/engine/objects.cpp.o CMakeFiles/3DL.dir/src/engine/renderer.cpp.o CMakeFiles/3DL.dir/src/engine/utils.cpp.o CMakeFiles/3DL.dir/src/main.cpp.o CMakeFiles/3DL.dir/src/engine/GPU/kernel.c.o
+build 3DL: CXX_EXECUTABLE_LINKER__3DL_Debug CMakeFiles/3DL.dir/include/imgui/imgui.cpp.o CMakeFiles/3DL.dir/include/imgui/imgui_demo.cpp.o CMakeFiles/3DL.dir/include/imgui/imgui_draw.cpp.o CMakeFiles/3DL.dir/include/imgui/imgui_impl_opengl3.cpp.o CMakeFiles/3DL.dir/include/imgui/imgui_impl_sdl2.cpp.o CMakeFiles/3DL.dir/include/imgui/imgui_impl_sdlrenderer2.cpp.o CMakeFiles/3DL.dir/include/imgui/imgui_tables.cpp.o CMakeFiles/3DL.dir/include/imgui/imgui_widgets.cpp.o CMakeFiles/3DL.dir/src/engine/GPU/openclutils.cpp.o CMakeFiles/3DL.dir/src/engine/camera.cpp.o CMakeFiles/3DL.dir/src/engine/lighting.cpp.o CMakeFiles/3DL.dir/src/engine/linalg.cpp.o CMakeFiles/3DL.dir/src/engine/objects.cpp.o CMakeFiles/3DL.dir/src/engine/renderer.cpp.o CMakeFiles/3DL.dir/src/engine/utils.cpp.o CMakeFiles/3DL.dir/src/main.cpp.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/3DL.dir
   POST_BUILD = :
