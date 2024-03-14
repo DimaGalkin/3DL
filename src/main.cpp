@@ -3,11 +3,11 @@
 #include "engine/camera.hpp"
 
 int main(const int argc, const char** argv) {
-    ThreeDL::Camera camera ({0, 0, 0}, {0, 0, 0}, 75);
+    ThreeDL::Camera camera ({0, 0, 0}, {0, 0, 0}, 36);
     ThreeDL::Renderer renderer(camera, 1280, 720);
 
     ThreeDL::AmbientLight ambient (0xffffff, 0.1);
-    ThreeDL::PointLight point ({0, 50, -500}, 0xffffff, 0.5);
+    ThreeDL::PointLight point ({0, 50, -500}, 0xffffff, 10000);
 
     ThreeDL::Object object (
         "src/f15.obj",

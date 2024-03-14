@@ -17,8 +17,8 @@ namespace ThreeDL {
 
             static std::vector<std::string> split(const std::string& str, char delim);
             static uint32_t samplePixel(const SDL_Surface *surface, const uint32_t x, const uint32_t y);
-            static unsigned int linearToUint(const double r, const double g, const double b);
-            static void uintToLinear(const unsigned int color, float* colorArray);
+            static uint32_t linearToUint(const double r, const double g, const double b);
+            static void uintToLinear(const uint32_t color, float* colorArray);
 
             ~Utils() = delete;
     };

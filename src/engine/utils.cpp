@@ -19,11 +19,11 @@ uint32_t ThreeDL::Utils::samplePixel(const SDL_Surface *surface, const uint32_t 
     return *reinterpret_cast<uint32_t*>(p);
 }
 
-unsigned int ThreeDL::Utils::linearToUint(const double r, const double g, const double b) {
+uint32_t ThreeDL::Utils::linearToUint(const double r, const double g, const double b) {
     return (static_cast<uint8_t>(r * 255) << 16) | (static_cast<uint8_t>(g * 255) << 8) | static_cast<uint8_t>(b * 255);
 }
 
-void ThreeDL::Utils::uintToLinear(const unsigned int color, float* colorArray) {
+void ThreeDL::Utils::uintToLinear(const uint32_t color, float* colorArray) {
     colorArray[0] = static_cast<float>((color >> 16) & 0xFF) / 255.0f;
     colorArray[1] = static_cast<float>((color >> 8) & 0xFF) / 255.0f;
     colorArray[2] = static_cast<float>(color & 0xFF) / 255.0f;

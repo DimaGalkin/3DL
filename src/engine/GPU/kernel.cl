@@ -1,42 +1,42 @@
 #include "src/engine/GPU/types.h"
 #include "src/engine/GPU/mathcl.h"
 
-#define uint32_t unsigned int
+typedef unsigned int uint32_t;
 
-//void draw_line(
-//        int ax, int ay,
-//        int bx, int by,
-//        global int* C
-//) {
-//    int dx = bx - ax;
-//    int dy = by - ay;
-//
-//    int steps = abs(dx) > abs(dy) ? abs(dx) : abs(dy);
-//
-//    double Xinc = dx / (double) steps;
-//    double Yinc = dy / (double) steps;
-//
-//    double X = ax;
-//    double Y = ay;
-//
-//    for (int i = 0; i <= steps; i++) {
-//        if (X >= 1920 || X < 0 || Y >= 1080 || Y < 0) continue;
-//        C[(int) X + (int) Y * 1920] = 0xff00ff;
-//        X += Xinc;
-//        Y += Yinc;
-//    }
-//}
+void draw_line(
+    int ax, int ay, 
+    int bx, int by, 
+    global int* C
+) {
+    int dx = bx - ax;
+    int dy = by - ay;
+
+    int steps = abs(dx) > abs(dy) ? abs(dx) : abs(dy);
+
+    double Xinc = dx / (double) steps;
+    double Yinc = dy / (double) steps;
+
+    double X = ax;
+    double Y = ay;
+
+    for (int i = 0; i <= steps; i++) {
+        if (X >= 1920 || X < 0 || Y >= 1080 || Y < 0) continue;
+        C[(int) X + (int) Y * 1920] = 0xff00ff;
+        X += Xinc;
+        Y += Yinc;
+    }
+}
 
 void project (
-        const struct Triangle* in,
-        struct ScreenTriangle* out,
-        global const struct State* info
+    const struct Triangle* in,
+    struct ScreenTriangle* out,
+    global const struct State* info
 ) {
     double fov = 75.0;
-    double dtp = ((double)info->width_ / 2.0) / tan((fov / 2.0) * (M_PI / 180.0));
+    double dtp = ((double)info->width_ / 2.0) / tan((fov / 2.0) * (M_PI / 180.0)); 
     double h_height = (double)info->height_ / 2.0;
     double h_width = (double)info->width_ / 2.0;
-
+    
     double t1 = (dtp - 0) / in->v1.z;
     double t2 = (dtp - 0) / in->v2.z;
     double t3 = (dtp - 0) / in->v3.z;
@@ -52,28 +52,32 @@ void project (
     out->v3.x = in->v3.x * t3 + h_width;
     out->v3.y = in->v3.y * t3 + h_height;
     out->v3.depth_info_ = in->v3.z;
+
+    out->t1 = in->t1;
+    out->t2 = in->t2;
+    out->t3 = in->t3;
 }
 
 unsigned char clip(
-        struct Triangle* tri,
-        struct Plane* plane,
-        struct Triangle* out_tris
+    struct Triangle* tri,
+    struct Plane* plane,
+    struct Triangle* out_tris
 ) {
     struct Vector3 dir1 = tri->v2;
     struct Vector3 dir2 = tri->v3;
     struct Vector3 dir3 = tri->v1;
 
-    SubVec3(&dir1, &tri->v1, &dir1);
-    SubVec3(&dir2, &tri->v2, &dir2);
-    SubVec3(&dir3, &tri->v3, &dir3);
-
+    Vec3Subtract(&dir1, &tri->v1, &dir1);
+    Vec3Subtract(&dir2, &tri->v2, &dir2);
+    Vec3Subtract(&dir3, &tri->v3, &dir3);
+    
     struct Ray ray1 = {tri->v1, dir1};
     struct Ray ray2 = {tri->v2, dir2};
     struct Ray ray3 = {tri->v3, dir3};
 
-    struct Intersection info1;
-    struct Intersection info2;
-    struct Intersection info3;
+    struct IntersectInfo info1;
+    struct IntersectInfo info2;
+    struct IntersectInfo info3;
 
     intersects(plane, &ray1, &info1);
     intersects(plane, &ray2, &info2);
@@ -102,10 +106,10 @@ unsigned char clip(
     }
 
     if (
-            !info1.valid_ && !info2.valid_ && info3.valid_,
-                    !info1.valid_ && info2.valid_ && !info3.valid_,
-                    info1.valid_ && !info2.valid_ && !info3.valid_
-            ) {
+        !info1.valid_ && !info2.valid_ && info3.valid_,
+        !info1.valid_ && info2.valid_ && !info3.valid_,
+        info1.valid_ && !info2.valid_ && !info3.valid_
+    ) {
         return 0;
     }
 
@@ -114,8 +118,8 @@ unsigned char clip(
 
         if (inside) {
             out_tris[0].v1 = tri->v2;
-            out_tris[0].v2 = info2.position_;
-            out_tris[0].v3 = info1.position_;
+            out_tris[0].v2 = info2.intersect_;
+            out_tris[0].v3 = info1.intersect_;
 
             out_tris[0].t1 = tri->t2;
             calcUv(&tri->t2, &tri->t3, info2.t_, &out_tris[0].t2);
@@ -125,11 +129,11 @@ unsigned char clip(
         } else {
             out_tris[0].v1 = tri->v1;
             out_tris[0].v2 = tri->v3;
-            out_tris[0].v3 = info2.position_;
+            out_tris[0].v3 = info2.intersect_;
 
             out_tris[1].v1 = tri->v1;
-            out_tris[1].v2 = info1.position_;
-            out_tris[1].v3 = info2.position_;
+            out_tris[1].v2 = info1.intersect_;
+            out_tris[1].v3 = info2.intersect_;
 
             out_tris[0].t1 = tri->t1;
             out_tris[0].t2 = tri->t3;
@@ -148,8 +152,8 @@ unsigned char clip(
 
         if (inside) {
             out_tris[0].v1 = tri->v1;
-            out_tris[0].v2 = info1.position_;
-            out_tris[0].v3 = info3.position_;
+            out_tris[0].v2 = info1.intersect_;
+            out_tris[0].v3 = info3.intersect_;
 
             out_tris[0].t1 = tri->t1;
             calcUv(&tri->t1, &tri->t2, info1.t_, &out_tris[0].t2);
@@ -159,11 +163,11 @@ unsigned char clip(
         } else {
             out_tris[0].v1 = tri->v2;
             out_tris[0].v2 = tri->v3;
-            out_tris[0].v3 = info3.position_;
+            out_tris[0].v3 = info3.intersect_;
 
             out_tris[1].v1 = tri->v2;
-            out_tris[1].v2 = info1.position_;
-            out_tris[1].v3 = info3.position_;
+            out_tris[1].v2 = info1.intersect_;
+            out_tris[1].v3 = info3.intersect_;
 
             out_tris[0].t1 = tri->t2;
             out_tris[0].t2 = tri->t3;
@@ -182,8 +186,8 @@ unsigned char clip(
 
         if (inside) {
             out_tris[0].v1 = tri->v3;
-            out_tris[0].v2 = info2.position_;
-            out_tris[0].v3 = info3.position_;
+            out_tris[0].v2 = info2.intersect_;
+            out_tris[0].v3 = info3.intersect_;
 
             out_tris[0].t1 = tri->t3;
             calcUv(&tri->t2, &tri->t3, info2.t_, &out_tris[0].t2);
@@ -193,11 +197,11 @@ unsigned char clip(
         } else {
             out_tris[0].v1 = tri->v1;
             out_tris[0].v2 = tri->v2;
-            out_tris[0].v3 = info2.position_;
+            out_tris[0].v3 = info2.intersect_;
 
             out_tris[1].v1 = tri->v1;
-            out_tris[1].v2 = info3.position_;
-            out_tris[1].v3 = info2.position_;
+            out_tris[1].v2 = info3.intersect_;
+            out_tris[1].v3 = info2.intersect_;
 
             out_tris[0].t1 = tri->t1;
             out_tris[0].t2 = tri->t2;
@@ -215,9 +219,9 @@ unsigned char clip(
 }
 
 double interpolateZ(
-        struct Vector2* p1,
-        struct Vector2* p2,
-        struct Vector2* p
+    struct Vector2* p1,
+    struct Vector2* p2,
+    struct Vector2* p
 ) {
     if (p1->depth_info_ == p2->depth_info_) return p1->depth_info_;
 
@@ -240,17 +244,17 @@ double interpolateZ(
 }
 
 double intersectVec2(
-        struct Vector2* a_pos,
-        struct Vector2* a_dir,
-        struct Vector2* b_pos,
-        struct Vector2* b_dir,
-        struct Vector2* out
+    struct Vector2* a_pos,
+    struct Vector2* a_dir,
+    struct Vector2* b_pos,
+    struct Vector2* b_dir,
+    struct Vector2* out
 ) {
     double t = (b_dir->x * (a_pos->y - b_pos->y) - b_dir->y * (a_pos->x - b_pos->x)) / (a_dir->x * b_dir->y - a_dir->y * b_dir->x);
     struct Vector2 res = *a_dir;
 
-    MulVec2Scalar(&res, t, &res);
-    AddVec2(&res, a_pos, &res);
+    Vec2Multiply(&res, t, &res);
+    Vec2Add(&res, a_pos, &res);
 
     out->x = res.x;
     out->y = res.y;
@@ -275,25 +279,25 @@ double abs_d(double in) {
 }
 
 void draw_texture(
-        struct ScreenTriangle* tri,
-        struct Triangle* gsp_tri,
-        double* zbuffer,
-        global const struct State* info,
-        global uint* texture,
-        global struct Vector3* normals,
-        global struct Vector3* positions,
-        global uint* diffuseColors,
-        global uint* specularColors,
-        global uint* C
+    struct ScreenTriangle* tri,
+    struct Triangle* gsp_tri,
+    double* zbuffer,
+    global const struct State* info,
+    global uint* texture,
+    global struct Vector3* normals,
+    global struct Vector3* positions,
+    global uint* diffuseColors,
+    global uint* specularColors,
+    global uint* C
 ) {
     if (tri->v1.y < tri->v2.y) {
         struct Vector2 temp = tri->v1;
         tri->v1 = tri->v2;
         tri->v2 = temp;
 
-        temp = gsp_tri->t1;
-        gsp_tri->t1 = gsp_tri->t2;
-        gsp_tri->t2 = temp;
+        temp = tri->t1;
+        tri->t1 = tri->t2;
+        tri->t2 = temp;
 
         struct Vector3 temp2 = gsp_tri->v1;
         gsp_tri->v1 = gsp_tri->v2;
@@ -309,9 +313,9 @@ void draw_texture(
         tri->v2 = tri->v3;
         tri->v3 = temp;
 
-        temp = gsp_tri->t2;
-        gsp_tri->t2 = gsp_tri->t3;
-        gsp_tri->t3 = temp;
+        temp = tri->t2;
+        tri->t2 = tri->t3;
+        tri->t3 = temp;
 
         struct Vector3 temp2 = gsp_tri->v2;
         gsp_tri->v2 = gsp_tri->v3;
@@ -327,9 +331,9 @@ void draw_texture(
         tri->v1 = tri->v2;
         tri->v2 = temp;
 
-        temp = gsp_tri->t1;
-        gsp_tri->t1 = gsp_tri->t2;
-        gsp_tri->t2 = temp;
+        temp = tri->t1;
+        tri->t1 = tri->t2;
+        tri->t2 = temp;
 
         struct Vector3 temp2 = gsp_tri->v1;
         gsp_tri->v1 = gsp_tri->v2;
@@ -350,32 +354,32 @@ void draw_texture(
     struct Vector2 on_line1 = tri->v3;
     struct Vector2 on_line2 = tri->v2;
 
-    SubVec2(&line_one, &tri->v3, &line_one);
-    SubVec2(&line_two, &tri->v2, &line_two);
+    Vec2Subtract(&line_one, &tri->v3, &line_one);
+    Vec2Subtract(&line_two, &tri->v2, &line_two);
 
-    struct Vector2 uvOne = gsp_tri->t1;
-    struct Vector2 uvTwo = gsp_tri->t1;
-    struct Vector2 uv_on_line = gsp_tri->t3;
-    struct Vector2 uv_on_line2 = gsp_tri->t2;
+    struct Vector2 uvOne = tri->t1;
+    struct Vector2 uvTwo = tri->t1;
+    struct Vector2 uv_on_line = tri->t3;
+    struct Vector2 uv_on_line2 = tri->t2;
 
-    SubVec2(&uvOne, &gsp_tri->t3, &uvOne);
-    SubVec2(&uvTwo, &gsp_tri->t2, &uvTwo);
+    Vec2Subtract(&uvOne, &tri->t3, &uvOne);
+    Vec2Subtract(&uvTwo, &tri->t2, &uvTwo);
 
     struct Vector3 gsp_line_one = gsp_tri->v1;
     struct Vector3 gsp_line_two = gsp_tri->v1;
     struct Vector3 gsp_on_line1 = gsp_tri->v3;
     struct Vector3 gsp_on_line2 = gsp_tri->v2;
 
-    SubVec3(&gsp_line_one, &gsp_tri->v3, &gsp_line_one);
-    SubVec3(&gsp_line_two, &gsp_tri->v2, &gsp_line_two);
+    Vec3Subtract(&gsp_line_one, &gsp_tri->v3, &gsp_line_one);
+    Vec3Subtract(&gsp_line_two, &gsp_tri->v2, &gsp_line_two);
 
     struct Vector3 normal_line_one = gsp_tri->n1;
     struct Vector3 normal_line_two = gsp_tri->n1;
     struct Vector3 normal_on_line1 = gsp_tri->n3;
     struct Vector3 normal_on_line2 = gsp_tri->n2;
 
-    SubVec3(&normal_line_one, &gsp_tri->n3, &normal_line_one);
-    SubVec3(&normal_line_two, &gsp_tri->n2, &normal_line_two);
+    Vec3Subtract(&normal_line_one, &gsp_tri->n3, &normal_line_one);
+    Vec3Subtract(&normal_line_two, &gsp_tri->n2, &normal_line_two);
 
     struct Line line1 = {tri->v1, tri->v3};
     struct Line line2 = {tri->v2, tri->v1};
@@ -383,20 +387,20 @@ void draw_texture(
     for (int i = (int)yMax; i > yMin; --i) {
         if (floor(yMid) == i) {
             line_two = tri->v2;
-            SubVec2(&line_two, &tri->v3, &line_two);
+            Vec2Subtract(&line_two, &tri->v3, &line_two);
             on_line2 = tri->v3;
             line2 = (struct Line){tri->v3, tri->v2};
 
-            uv_on_line2 = gsp_tri->t3;
-            uvTwo = gsp_tri->t2;
-            SubVec2(&uvTwo, &gsp_tri->t3, &uvTwo);
+            uv_on_line2 = tri->t3;
+            uvTwo = tri->t2;
+            Vec2Subtract(&uvTwo, &tri->t3, &uvTwo);
 
             gsp_line_two = gsp_tri->v2;
-            SubVec3(&gsp_line_two, &gsp_tri->v3, &gsp_line_two);
+            Vec3Subtract(&gsp_line_two, &gsp_tri->v3, &gsp_line_two);
             gsp_on_line2 = gsp_tri->v3;
 
             normal_line_two = gsp_tri->n2;
-            SubVec3(&normal_line_two, &gsp_tri->n3, &normal_line_two);
+            Vec3Subtract(&normal_line_two, &gsp_tri->n3, &normal_line_two);
             normal_on_line2 = gsp_tri->n3;
         }
 
@@ -459,21 +463,21 @@ void draw_texture(
 
             struct Vector2 uvIntersect3;
             struct Vector2 isectDir = uvIntersect2;
-            SubVec2(&isectDir, &uvIntersect1, &isectDir);
+            Vec2Subtract(&isectDir, &uvIntersect1, &isectDir);
             interpolate(&uvIntersect1, &isectDir, t, &uvIntersect3);
 
             struct Vector3 gspIntersect3;
             struct Vector3 gspIsectDir = gspIntersect2;
-            SubVec3(&gspIsectDir, &gspIntersect1, &gspIsectDir);
+            Vec3Subtract(&gspIsectDir, &gspIntersect1, &gspIsectDir);
             interpolateVec3(&gspIntersect1, &gspIsectDir, t, &gspIntersect3);
 
             struct Vector3 normalIntersect3;
             struct Vector3 normalIsectDir = normalIntersect2;
-            SubVec3(&normalIsectDir, &normalIntersect1, &normalIsectDir);
+            Vec3Subtract(&normalIsectDir, &normalIntersect1, &normalIsectDir);
             interpolateVec3(&normalIntersect1, &normalIsectDir, t, &normalIntersect3);
 
-            unsigned int u = floor(uvIntersect3.x * info->texture_width_);
-            unsigned int v = info->texture_height_ - floor(uvIntersect3.y * info->texture_height_);
+            uint32_t u = floor(uvIntersect3.x * info->texture_width_);
+            uint32_t v = info->texture_height_ - floor(uvIntersect3.y * info->texture_height_);
 
             if ((int)y < info->height_ && (int)y >= 0 && j < info->width_ && j >= 0 && intersect3.depth_info_ > zbuffer[(int)(j + y * info->width_)]) {
                 if (u > info->texture_width_ || u < 0 || v > info->texture_height_ || v < 0) {
@@ -503,14 +507,14 @@ void draw_texture(
 
 bool backfacecull(const struct Triangle* tr) {
     struct Vector3 normal;
-    CrossVec3(&tr->v2, &tr->v1, &normal);
-    NormalizeVec3(&normal, &normal);
+    Vec3Cross(&tr->v2, &tr->v1, &normal);
+    normalize(&normal, &normal);
 
     struct Vector3 view;
-    SubVec3(&tr->v1, &tr->v3, &view);
-    NormalizeVec3(&view, &view);
+    Vec3Subtract(&tr->v1, &tr->v3, &view);
+    normalize(&view, &view);
 
-    double dp = DotVec3(&normal, &view);
+    double dp = Vec3Dot(&normal, &view);
 
     return dp > 0;
 }
@@ -563,30 +567,30 @@ void kernel gpu_lighting (
         struct Vector3 light_color = {light_r, light_g, light_b};
 
         if (light.type_ == AMBIENT) {
-            MulVec3Scalar(&light_color, light.intensity_, &light_color);
-            AddVec3(&final_color, &light_color, &final_color);
+            Vec3Multiply(&light_color, light.intensity_, &light_color);
+            Vec3Add(&final_color, &light_color, &final_color);
         } else if (light.type_ == POINT) {
-            SubVec3(&light.position_, &info->camera_position_, &light.position_);
-            RotateVec3(&light.position_, &info->camera_rotation_, &light.position_);
+            Vec3Subtract(&light.position_, &info->camera_position_, &light.position_);
+            Vec3Rotate(&light.position_, &info->camera_rotation_);
 
             struct Vector3 light_dir;
-            SubVec3(&position, &light.position_, &light_dir);
-            double distance = LengthVec3(&light_dir);
+            Vec3Subtract(&position, &light.position_, &light_dir);
+            double distance = Vec3Length(&light_dir);
             distance = distance * distance;
-            NormalizeVec3(&light_dir, &light_dir);
+            normalize(&light_dir, &light_dir);
 
-            double lambert = DotVec3(&light_dir, &normal);
+            double lambert = Vec3Dot(&light_dir, &normal);
             double spec = 0.0;
 
             if (lambert > 0) {
                 struct Vector3 view = position;
-                NormalizeVec3(&view, &view);
+                normalize(&view, &view);
 
                 struct Vector3 halfDir;
-                AddVec3(&light_dir, &view, &halfDir);
-                NormalizeVec3(&halfDir, &halfDir);
+                Vec3Add(&light_dir, &view, &halfDir);
+                normalize(&halfDir, &halfDir);
 
-                double specAngle = DotVec3(&halfDir, &normal);
+                double specAngle = Vec3Dot(&halfDir, &normal);
                 specAngle = max(specAngle, 0.0);
                 spec = pow(specAngle, 80);
             }
@@ -595,29 +599,29 @@ void kernel gpu_lighting (
             struct Vector3 diffuse;
             struct Vector3 specular;
 
-            MulVec3Scalar(&diffuseColor, lambert, &diffuse);
-            MulVec3(&diffuse, &light_color, &diffuse);
-            MulVec3Scalar(&diffuse, light.intensity_, &diffuse);
-            DivVec3Scalar(&diffuse, distance, &diffuse);
+            Vec3Multiply(&diffuseColor, lambert, &diffuse);
+            Vec3MultiplyVec3(&diffuse, &light_color, &diffuse);
+            Vec3Multiply(&diffuse, light.intensity_, &diffuse);
+            Vec3Divide(&diffuse, distance, &diffuse);
 
-            MulVec3Scalar(&specularColor, spec, &specular);
-            MulVec3(&specular, &light_color, &specular);
-            MulVec3Scalar(&specular, light.intensity_, &specular);
-            DivVec3Scalar(&specular, distance, &specular);
+            Vec3Multiply(&specularColor, spec, &specular);
+            Vec3MultiplyVec3(&specular, &light_color, &specular);
+            Vec3Multiply(&specular, light.intensity_, &specular);
+            Vec3Divide(&specular, distance, &specular);
 
             diffuse.x = max(diffuse.x, 0.0);
             diffuse.y = max(diffuse.y, 0.0);
             diffuse.z = max(diffuse.z, 0.0);
 
-            AddVec3(&diffuse, &specular, &color);
-            AddVec3(&final_color, &color, &final_color);
+            Vec3Add(&diffuse, &specular, &color);
+            Vec3Add(&final_color, &color, &final_color);
         }
     }
 
-    DivVec3Scalar(&final_color, info->num_lights_, &final_color);
+    Vec3Divide(&final_color, info->num_lights_, &final_color);
     Vec3GammaCorrect(&final_color, &final_color);
 
-    MulVec3(&final_color, &pixel_color, &final_color);
+    Vec3MultiplyVec3(&final_color, &pixel_color, &final_color);
 
     int r = (int)(final_color.x * 255);
     int g = (int)(final_color.y * 255);
@@ -630,7 +634,7 @@ void kernel gpu_lighting (
     r = min(r, 255);
     g = min(g, 255);
     b = min(b, 255);
-
+    
     pixels[pixel_num] = (r << 16) | (g << 8) | b;
 }
 
@@ -645,27 +649,27 @@ kernel void gpu_render (
     global struct uint* diffuseColors,
     global struct uint* specularColors,
     global uint* C
-) {
+){
     int gid = get_global_id(0);
 
     // make a copy of the triangle
     struct Triangle* tri_cpy = &A[gid];
 
-    AddVec3(&tri_cpy->v1, &info->model_position_, &tri_cpy->v1);
-    AddVec3(&tri_cpy->v2, &info->model_position_, &tri_cpy->v2);
-    AddVec3(&tri_cpy->v3, &info->model_position_, &tri_cpy->v3);
+    Vec3Add(&tri_cpy->v1, &info->model_position_, &tri_cpy->v1);
+    Vec3Add(&tri_cpy->v2, &info->model_position_, &tri_cpy->v2);
+    Vec3Add(&tri_cpy->v3, &info->model_position_, &tri_cpy->v3);
 
-    SubVec3(&tri_cpy->v1, &info->camera_position_, &tri_cpy->v1);
-    SubVec3(&tri_cpy->v2, &info->camera_position_, &tri_cpy->v2);
-    SubVec3(&tri_cpy->v3, &info->camera_position_, &tri_cpy->v3);
+    Vec3Subtract(&tri_cpy->v1, &info->camera_position_, &tri_cpy->v1);
+    Vec3Subtract(&tri_cpy->v2, &info->camera_position_, &tri_cpy->v2);
+    Vec3Subtract(&tri_cpy->v3, &info->camera_position_, &tri_cpy->v3);
 
-    RotateVec3(&tri_cpy->v1, &info->camera_rotation_, &tri_cpy->v1);
-    RotateVec3(&tri_cpy->v2, &info->camera_rotation_, &tri_cpy->v2);
-    RotateVec3(&tri_cpy->v3, &info->camera_rotation_, &tri_cpy->v3);
+    Vec3Rotate(&tri_cpy->v1, &info->camera_rotation_);
+    Vec3Rotate(&tri_cpy->v2, &info->camera_rotation_);
+    Vec3Rotate(&tri_cpy->v3, &info->camera_rotation_);
 
-    RotateVec3(&tri_cpy->n1, &info->camera_rotation_, &tri_cpy->n1);
-    RotateVec3(&tri_cpy->n2, &info->camera_rotation_, &tri_cpy->n2);
-    RotateVec3(&tri_cpy->n3, &info->camera_rotation_, &tri_cpy->n3);
+    Vec3Rotate(&tri_cpy->n1, &info->camera_rotation_);
+    Vec3Rotate(&tri_cpy->n2, &info->camera_rotation_);
+    Vec3Rotate(&tri_cpy->n3, &info->camera_rotation_);
 
     if (backfacecull(tri_cpy)) return;
 
@@ -674,31 +678,31 @@ kernel void gpu_render (
     struct Triangle tri_right_clipped[2];
 
     struct Plane near = {
-            {0, 0, -1},
-            {0, 0, -1},
-            {1, 0, 0}
-
+        {0, 0, -1},
+        {0, 0, -1},
+        {1, 0, 0}
+    
     };
 
     struct Plane left = {
-            {-1, 0, 0},
-            {0, 0, 0},
-            {0, 0, -1}
+        {-1, 0, 0},
+        {0, 0, 0},
+        {0, 0, -1}
     };
 
     struct Plane right = {
-            {1, 0, 0},
-            {0, 0, 0},
-            {0, 0, -1}
+        {1, 0, 0},
+        {0, 0, 0},
+        {0, 0, -1}
     };
 
     // Vec3Rotateate left and right planes as they are at the angle of fov/2
     struct Vector3 r = {0, -info->fov_, 0};
-    RotateVec3(&left.direction_, &r, &left.direction_);
-    RotateVec3(&left.normal_, &r, &left.normal_);
+    Vec3Rotate(&left.direction_, &r);
+    Vec3Rotate(&left.normal_, &r);
     r.y = r.y * -1;
-    RotateVec3(&right.direction_, &r, &right.direction_);
-    RotateVec3(&right.normal_, &r, &right.normal_);
+    Vec3Rotate(&right.direction_, &r);
+    Vec3Rotate(&right.normal_, &r);
 
     unsigned char n_triangles = clip(tri_cpy, &near, &tri_near_clipped);
     struct ScreenTriangle tri_projected;
@@ -722,7 +726,7 @@ kernel void gpu_render (
 
                 copyColours(tri_cpy, &tri_right_clipped[k]);
                 copyNormals(tri_cpy, &tri_right_clipped[k]);
-
+                
                 draw_texture (
                     &tri_projected,
                     &tri_right_clipped[k],

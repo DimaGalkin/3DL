@@ -1,7 +1,12 @@
-#ifndef GPU_TYPES
-#define GPU_TYPES
+#ifndef TYPES_H
+#define TYPES_H
+
+#ifndef uint32_t
+typedef unsigned int uint32_t;
+#endif
 
 enum LightType {
+    UNINITIALIZED,
     AMBIENT,
     POINT
 };
@@ -27,12 +32,12 @@ struct State {
 
     struct Vector3 model_position_;
 
-    unsigned int width_;
-    unsigned int height_;
-    unsigned int texture_width_;
-    unsigned int texture_height_;
+    uint32_t width_;
+    uint32_t height_;
+    uint32_t texture_width_;
+    uint32_t texture_height_;
 
-    unsigned int num_lights_;
+    uint32_t num_lights_;
 };
 
 struct Triangle {
@@ -48,8 +53,8 @@ struct Triangle {
     struct Vector3 n2;
     struct Vector3 n3;
 
-    unsigned int diffuse_color_;
-    unsigned int specular_color_;
+    uint32_t diffuse_color_;
+    uint32_t specular_color_;
     double shininess_;
 };
 
@@ -57,10 +62,14 @@ struct ScreenTriangle {
     struct Vector2 v1;
     struct Vector2 v2;
     struct Vector2 v3;
+
+    struct Vector2 t1;
+    struct Vector2 t2;
+    struct Vector2 t3;
 };
 
-struct Intersection {
-    struct Vector3 position_;
+struct IntersectInfo {
+    struct Vector3 intersect_;
     bool valid_;
     double t_;
 };
@@ -87,7 +96,7 @@ struct GPULight {
     struct Vector3 position_;
     struct Vector3 direction_;
 
-    unsigned int color_;
+    uint32_t color_;
 
     double intensity_;
 };

@@ -70,8 +70,6 @@ namespace ThreeDL {
             std::vector<const Light*> lights_;
 
             OpenCLUtils ocl_utils_;
-            gpu_render_program render_program_ = cl::Kernel();
-            gpu_lighting_program lighting_program_ = cl::Kernel();
 
             cl::Buffer zbuffer_buffer_;
             cl::Buffer pixels_buffer_;
@@ -84,8 +82,7 @@ namespace ThreeDL {
             cl::Buffer diffuse_buffer_;
             cl::Buffer specular_buffer_;
 
-            bool renderObject(const Object& object);
-            void renderLoop();
+            bool renderObject(const Object& object, gpu_render_program& program);
 
             static bool checkQuit();
     };

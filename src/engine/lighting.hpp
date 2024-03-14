@@ -25,7 +25,7 @@ namespace ThreeDL {
 
     class AmbientLight : public Light {
         public:
-            AmbientLight(unsigned int color, float intensity);
+            AmbientLight(uint32_t color, float intensity);
             AmbientLight() = delete;
 
             ~AmbientLight() = default;
@@ -33,7 +33,7 @@ namespace ThreeDL {
 
     class PointLight : public Light {
         public:
-            PointLight(const vec3& position, unsigned int color, const float intensity);
+            PointLight(const vec3& position, uint32_t color, const float intensity);
             PointLight() = delete;
 
             Object model_ = Object("src/light.obj", FILEFORMAT::OBJ, 0xFFFFFF);
