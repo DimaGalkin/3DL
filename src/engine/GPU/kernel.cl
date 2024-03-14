@@ -724,8 +724,8 @@ kernel void gpu_render (
             for (int k = 0; k < n_triangles3; k++) {
                 project(&tri_right_clipped[k], &tri_projected, info);
 
-                copyColours(tri_cpy, &tri_right_clipped[k]);
-                copyNormals(tri_cpy, &tri_right_clipped[k]);
+                // copyColours(tri_cpy, &tri_right_clipped[k]);
+                // copyNormals(tri_cpy, &tri_right_clipped[k]);
                 
                 draw_texture (
                     &tri_projected,

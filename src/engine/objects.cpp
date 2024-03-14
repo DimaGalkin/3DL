@@ -37,7 +37,7 @@ void ThreeDL::Object::fillTextureBuffer(const std::string& texture_path) {
     }
 
     cl::SVMAllocator<uint32_t, cl::SVMTraitCoarse<>> svm_allocator;
-    texture_ = std::vector<uint32_t, tex_allocator_t>(texture->w * texture->h, 1, svm_allocator);
+    texture_ = std::vector<uint32_t>(texture->w * texture->h);
 
     for (int i = 0; i < texture->w; ++i) {
         for (int j = 0; j < texture->h; ++j) {
@@ -55,7 +55,7 @@ void ThreeDL::Object::fillTextureBuffer(const std::string& texture_path) {
 
 void ThreeDL::Object::fillTextureBuffer(const uint32_t color) {
     cl::SVMAllocator<uint32_t, cl::SVMTraitCoarse<>> svm_allocator;
-    texture_ = std::vector<uint32_t, tex_allocator_t>(1, 1, svm_allocator);
+    texture_ = std::vector<uint32_t>(1);
     texture_[0] = color;
 
     texture_w_ = 1;
@@ -72,7 +72,7 @@ void ThreeDL::Object::fillTriangleBuffer(
             triangles_.resize(loaded.size());
 
             cl::SVMAllocator<Triangle, cl::SVMTraitCoarse<>> svm_allocator;
-            triangles_ = std::vector<Triangle, tri_allocator_t>(loaded.size(), {}, svm_allocator);
+            triangles_ = std::vector<Triangle>(loaded.size());
             std::copy(loaded.begin(), loaded.end(), triangles_.begin());
 
             loaded.clear();

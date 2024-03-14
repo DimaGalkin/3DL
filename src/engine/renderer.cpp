@@ -4,11 +4,21 @@ ThreeDL::Renderer::Renderer(
         ThreeDL::Camera &camera,
         const uint32_t width,
         const uint32_t height
-) : camera_(camera),
-    width_(width),
+) : width_(width),
     height_(height),
-    ocl_utils_(OpenCLUtils())
-{
+    camera_(camera)
+{ init(); }
+
+ThreeDL::Renderer::Renderer(
+        const ThreeDL::CameraController &controller,
+        const uint32_t width,
+        const uint32_t height
+) : width_(width),
+    height_(height),
+    camera_(controller.getCamera())
+{ init(); }
+
+void ThreeDL::Renderer::init() {
     SDL_Init(SDL_INIT_VIDEO);
     SDL_CreateWindowAndRenderer(width_, height_, 0, &window_, &renderer_);
     SDL_SetWindowTitle(window_, "3DL");
@@ -26,15 +36,15 @@ ThreeDL::Renderer::Renderer(
     ImGui_ImplSDLRenderer2_Init(renderer_);
 
     state_ = State {
-        camera_.position_.asGPUType(),
-        camera_.rotation_.asGPUType(),
-        camera_.fov_,
-        {0, 0, 0},
-        width_,
-        height_,
-        0,
-        0,
-        0
+            camera_.position_.asGPUType(),
+            camera_.rotation_.asGPUType(),
+            camera_.fov_,
+            {0, 0, 0},
+            width_,
+            height_,
+            0,
+            0,
+            0
     };
 }
 
@@ -101,25 +111,25 @@ void ThreeDL::Renderer::begin() {
         normal_buffer_ = cl::Buffer(
                 ocl_utils_.context_,
                 CL_MEM_READ_WRITE,
-                sizeof(Vector3) * render_queue_.size()
+                sizeof(Vector3) * width_ * height_
         );
 
         position_buffer_ = cl::Buffer(
                 ocl_utils_.context_,
                 CL_MEM_READ_WRITE,
-                sizeof(Vector3) * render_queue_.size()
+                sizeof(Vector3) * width_ * height_
         );
 
         diffuse_buffer_ = cl::Buffer(
                 ocl_utils_.context_,
                 CL_MEM_READ_WRITE,
-                sizeof(uint32_t) * render_queue_.size()
+                sizeof(uint32_t) * width_ * height_
         );
 
         specular_buffer_ = cl::Buffer(
                 ocl_utils_.context_,
                 CL_MEM_READ_WRITE,
-                sizeof(uint32_t) * render_queue_.size()
+                sizeof(uint32_t) * width_ * height_
         );
 
         client_quit |= checkQuit();
@@ -158,24 +168,24 @@ void ThreeDL::Renderer::begin() {
 
         for (const auto& light : lights_) {
             if (light->type_ != LightType::POINT) continue;
-            //client_quit = client_quit || renderObject(light->model_, gpu_render);
+            client_quit = client_quit || renderObject(light->model_, gpu_render);
         }
 
         client_quit |= checkQuit();
 
         cl::NDRange global {width_ * height_};
 
-//        gpu_lighting (
-//            cl::EnqueueArgs(ocl_utils_.queue_, global),
-//            pixels_buffer_,
-//            lights_buffer_,
-//            state_buffer_,
-//            diffuse_buffer_,
-//            specular_buffer_,
-//            normal_buffer_,
-//            position_buffer_,
-//            zbuffer_buffer_
-//        ).wait();
+        gpu_lighting (
+            cl::EnqueueArgs(ocl_utils_.queue_, global),
+            pixels_buffer_,
+            lights_buffer_,
+            state_buffer_,
+            diffuse_buffer_,
+            specular_buffer_,
+            normal_buffer_,
+            position_buffer_,
+            zbuffer_buffer_
+        ).wait();
 
         client_quit |= checkQuit();
 
@@ -204,7 +214,8 @@ void ThreeDL::Renderer::begin() {
     SDL_Quit();
 }
 
-bool ThreeDL::Renderer::renderObject(const ThreeDL::Object& object, gpu_render_program& gpu_render) {
+bool ThreeDL::Renderer::renderObject(const
+ThreeDL::Object& object, gpu_render_program& gpu_render) {
     bool client_quit = false;
 
     state_.texture_width_ = object.texture_w_;

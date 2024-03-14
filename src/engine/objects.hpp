@@ -19,8 +19,8 @@ namespace ThreeDL {
     using tri_allocator_t = cl::SVMAllocator<Triangle, cl::SVMTraitCoarse<>>;
     using tex_allocator_t = cl::SVMAllocator<uint32_t, cl::SVMTraitCoarse<>>;
 
-    using tribuf_t = std::vector<Triangle, tri_allocator_t>;
-    using texbuf_t = std::vector<uint32_t, tex_allocator_t>;
+    using tribuf_t = std::vector<Triangle>;
+    using texbuf_t = std::vector<uint32_t>;
 
     enum class FILEFORMAT {
         OBJ

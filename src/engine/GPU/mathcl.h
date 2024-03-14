@@ -1,5 +1,4 @@
-#ifndef MATHCL_H
-#define MATHCL_H
+#pragma once
 
 #include "types.h"
 
@@ -350,5 +349,3 @@ void copyNormals(
     v2->n2 = v1->n2;
     v2->n3 = v1->n3;
 }
-
-#endif

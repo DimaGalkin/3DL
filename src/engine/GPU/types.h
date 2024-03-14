@@ -1,5 +1,4 @@
-#ifndef TYPES_H
-#define TYPES_H
+#pragma once
 
 #ifndef uint32_t
 typedef unsigned int uint32_t;
@@ -100,5 +99,3 @@ struct GPULight {
 
     double intensity_;
 };
-
-#endif

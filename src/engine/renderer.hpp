@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "camera.hpp"
+#include "controller.hpp"
 #include "GPU/types.h"
 #include "objects.hpp"
 #include "lighting.hpp"
@@ -37,6 +38,7 @@ namespace ThreeDL {
     class Renderer {
         public:
             Renderer(Camera& camera, const uint32_t width, const uint32_t height);
+            Renderer(const CameraController& controller, const uint32_t width, const uint32_t height);
             Renderer() = delete;
 
             void add(const Object* object);
@@ -53,12 +55,12 @@ namespace ThreeDL {
             SDL_Surface* pixels_surface_;
             SDL_Texture* pixels_texture_;
 
-            Camera& camera_;
-
             State state_;
 
             uint32_t width_;
             uint32_t height_;
+
+            Camera& camera_;
 
             bool gui_enabled_ = false;
             uint64_t enabled_ticks_ = 0;
@@ -81,6 +83,8 @@ namespace ThreeDL {
             cl::Buffer position_buffer_;
             cl::Buffer diffuse_buffer_;
             cl::Buffer specular_buffer_;
+
+            void init();
 
             bool renderObject(const Object& object, gpu_render_program& program);
 

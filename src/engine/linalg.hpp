@@ -87,4 +87,7 @@ namespace ThreeDL {
 
             ~Vec2() = default;
     } typedef vec2;
+
+    const vec3 zero_vec3 = vec3{0, 0, 0};
+    const vec2 zero_vec2 = vec2{0, 0};
 };

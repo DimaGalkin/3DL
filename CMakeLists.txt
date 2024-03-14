@@ -137,4 +137,6 @@ add_executable(3DL
         src/engine/utils.cpp
         src/engine/utils.hpp
         src/main.cpp
-        src/main.hpp)
+        src/main.hpp
+        src/engine/controller.cpp
+        src/engine/controller.hpp)
