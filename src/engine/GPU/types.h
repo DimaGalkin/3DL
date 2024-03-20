@@ -10,6 +10,12 @@ enum LightType {
     POINT
 };
 
+enum RENDERMODE {
+    WIREFRAME,
+    WIREFRAME_OVERLAY,
+    SHADED
+};
+
 struct Vector2 {
     double x;
     double y;
@@ -25,6 +31,8 @@ struct Vector3 {
 };
 
 struct State {
+    enum RENDERMODE mode_;
+
     struct Vector3 camera_position_;
     struct Vector3 camera_rotation_;
     double fov_;

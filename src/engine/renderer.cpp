@@ -6,8 +6,11 @@ ThreeDL::Renderer::Renderer(
         const uint32_t height
 ) : width_(width),
     height_(height),
-    camera_(camera)
-{ init(); }
+    camera_(camera),
+    gui_(nullptr, nullptr)
+{
+    init();
+}
 
 ThreeDL::Renderer::Renderer(
         const ThreeDL::CameraController &controller,
@@ -15,8 +18,11 @@ ThreeDL::Renderer::Renderer(
         const uint32_t height
 ) : width_(width),
     height_(height),
-    camera_(controller.getCamera())
-{ init(); }
+    camera_(controller.getCamera()),
+    gui_(nullptr, nullptr)
+{
+    init();
+}
 
 void ThreeDL::Renderer::init() {
     SDL_Init(SDL_INIT_VIDEO);
@@ -27,15 +33,8 @@ void ThreeDL::Renderer::init() {
 
     zbuffer_.assign(width_ * height_, -INFINITY);
 
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO(); (void)io;
-    ImGui::StyleColorsDark();
-
-    ImGui_ImplSDL2_InitForSDLRenderer(window_, renderer_);
-    ImGui_ImplSDLRenderer2_Init(renderer_);
-
     state_ = State {
+            mode_,
             camera_.position_.asGPUType(),
             camera_.rotation_.asGPUType(),
             camera_.fov_,
@@ -56,13 +55,37 @@ void ThreeDL::Renderer::add(const ThreeDL::Light *light) {
     lights_.push_back(light);
 }
 
-bool ThreeDL::Renderer::checkQuit() {
+void ThreeDL::Renderer::begin() {
+    std::thread render_thread (&ThreeDL::Renderer::render, this);
+
+    uint64_t ticks_at_last_frame = 0;
+
     SDL_Event event;
-    SDL_PollEvent(&event);
-    return event.type == SDL_QUIT;
+
+    while (!client_quit_) {
+        SDL_PollEvent(&event);
+
+        if (event.type == SDL_QUIT) {
+            client_quit_ = true;
+        }
+
+        //ImGui_ImplSDL2_ProcessEvent(&event);
+
+        uint64_t delta_ticks = SDL_GetTicks64() - ticks_at_last_frame;
+
+        if (delta_ticks == 0) continue;
+
+        render_mutex_.lock();
+        animation(delta_ticks);
+        render_mutex_.unlock();
+
+        ticks_at_last_frame = SDL_GetTicks64();
+    }
+
+    render_thread.join();
 }
 
-void ThreeDL::Renderer::begin() {
+void ThreeDL::Renderer::render() {
     std::cout << "Starting Kernel Compilation..." << std::endl;
 
     cl::Program render_program = ocl_utils_.buildProgram(
@@ -79,10 +102,22 @@ void ThreeDL::Renderer::begin() {
     gpu_render_program gpu_render (cl::Kernel(render_program, "gpu_render"));
     gpu_lighting_program gpu_lighting (cl::Kernel(lighting_program, "gpu_lighting"));
 
-    bool client_quit = false;
+    gui_ = GUI(window_, renderer_);
 
-    while (!client_quit) {
-        client_quit |= checkQuit();
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplSDL2_InitForSDLRenderer(window_, renderer_);
+    ImGui_ImplSDLRenderer2_Init(renderer_);
+
+    while (!client_quit_) {
+        bool show_gui = gui_enabled_;
+
+        if (show_gui) {
+            gui_.startFrame();
+        }
 
         pixels_buffer_ = cl::Buffer(
                 ocl_utils_.context_,
@@ -132,8 +167,6 @@ void ThreeDL::Renderer::begin() {
                 sizeof(uint32_t) * width_ * height_
         );
 
-        client_quit |= checkQuit();
-
         for (const auto& light : lights_) {
             gpu_lights_.push_back(light->asGPUType());
         }
@@ -154,24 +187,36 @@ void ThreeDL::Renderer::begin() {
                 zbuffer_.data()
         );
 
-        client_quit |= checkQuit();
+        render_mutex_.lock();
 
         state_.camera_position_ = camera_.position_.asGPUType();
         state_.camera_rotation_ = camera_.rotation_.asGPUType();
+        state_.fov_ = camera_.fov_;
+
+        state_.width_ = width_;
+        state_.height_ = height_;
+
         state_.num_lights_ = lights_.size();
+        state_.mode_ = mode_;
+
+        render_mutex_.unlock();
 
         for (const auto& object : render_queue_) {
-            client_quit = client_quit || renderObject(*object, gpu_render);
+            renderObject(*object, gpu_render);
         }
-
-        client_quit |= checkQuit();
 
         for (const auto& light : lights_) {
             if (light->type_ != LightType::POINT) continue;
-            client_quit = client_quit || renderObject(light->model_, gpu_render);
-        }
 
-        client_quit |= checkQuit();
+            render_mutex_.lock();
+
+            Object model = light->model_;
+            model.position_ = light->position_;
+
+            render_mutex_.unlock();
+
+            renderObject(model, gpu_render);
+        }
 
         cl::NDRange global {width_ * height_};
 
@@ -187,11 +232,18 @@ void ThreeDL::Renderer::begin() {
             zbuffer_buffer_
         ).wait();
 
-        client_quit |= checkQuit();
-
         gpu_lights_.clear();
 
-        SDL_Surface* draw_surface = SDL_GetWindowSurface(window_);
+        SDL_Surface* draw_surface;
+
+        if (show_gui) {
+            draw_surface = pixels_surface_;
+            SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
+            SDL_RenderClear(renderer_);
+        } else {
+            draw_surface = SDL_GetWindowSurface(window_);
+        }
+
         auto* display = reinterpret_cast<uint32_t*>(draw_surface->pixels);
 
         SDL_LockSurface(draw_surface);
@@ -204,23 +256,31 @@ void ThreeDL::Renderer::begin() {
                 display
         );
 
-        client_quit |= checkQuit();
-
         SDL_UnlockSurface(draw_surface);
 
-        SDL_UpdateWindowSurface(window_);
-    }
+        if (show_gui) {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer_, draw_surface);
+            SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+            SDL_RenderCopy(renderer_, texture, nullptr, nullptr);
+            SDL_DestroyTexture(texture);
 
-    SDL_Quit();
+            gui_.renderFrame();
+
+            SDL_RenderPresent(renderer_);
+        } else {
+            SDL_UpdateWindowSurface(window_);
+        }
+    }
 }
 
-bool ThreeDL::Renderer::renderObject(const
-ThreeDL::Object& object, gpu_render_program& gpu_render) {
-    bool client_quit = false;
+void ThreeDL::Renderer::renderObject(const ThreeDL::Object& object, gpu_render_program& gpu_render) {
+    render_mutex_.lock();
 
     state_.texture_width_ = object.texture_w_;
     state_.texture_height_ = object.texture_h_;
     state_.model_position_ = object.position_.asGPUType();
+
+    render_mutex_.unlock();
 
     triangles_buffer_ = cl::Buffer(
         ocl_utils_.context_,
@@ -234,8 +294,6 @@ ThreeDL::Object& object, gpu_render_program& gpu_render) {
         sizeof(uint32_t) * object.texture_w_ * object.texture_h_
     );
 
-    client_quit |= checkQuit();
-
     ocl_utils_.queue_.enqueueWriteBuffer(
         triangles_buffer_,
         CL_TRUE,
@@ -243,8 +301,6 @@ ThreeDL::Object& object, gpu_render_program& gpu_render) {
         sizeof(Triangle) * object.triangles_.size(),
         object.triangles_.data()
     );
-
-    client_quit |= checkQuit();
 
     ocl_utils_.queue_.enqueueWriteBuffer(
         texture_buffer_,
@@ -254,8 +310,6 @@ ThreeDL::Object& object, gpu_render_program& gpu_render) {
         object.texture_.data()
     );
 
-    client_quit |= checkQuit();
-
     ocl_utils_.queue_.enqueueWriteBuffer(
         state_buffer_,
         CL_TRUE,
@@ -263,8 +317,6 @@ ThreeDL::Object& object, gpu_render_program& gpu_render) {
         sizeof(State),
         &state_
     );
-
-    client_quit |= checkQuit();
 
     cl::NDRange global {object.triangles_.size()};
 
@@ -281,13 +333,11 @@ ThreeDL::Object& object, gpu_render_program& gpu_render) {
         specular_buffer_,
         pixels_buffer_
     ).wait();
-
-    client_quit |= checkQuit();
-
-    return client_quit;
 }
 
 ThreeDL::Renderer::~Renderer() {
+    SDL_Quit();
+
     ImGui_ImplSDL2_Shutdown();
     ImGui_ImplSDLRenderer2_Shutdown();
     ImGui::DestroyContext();

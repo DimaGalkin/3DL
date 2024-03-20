@@ -1,24 +1,30 @@
 #include "engine/lighting.hpp"
 #include "engine/renderer.hpp"
-#include "engine/controller.hpp"
+#include "engine/camera.hpp"
 
-int main(const int argc, const char** argv) {
-    ThreeDL::CameraController controller (
+ThreeDL::CameraController controller (
         ThreeDL::vec3 {0, 0, 0},
         ThreeDL::vec3 {0, 0, 0},
-        36
-    );
+        75
+);
 
-    ThreeDL::Renderer renderer(controller, 1280, 720);
+ThreeDL::Renderer renderer (controller, 1280, 720);
 
-    ThreeDL::AmbientLight ambient (0xffffff, 0.1);
-    ThreeDL::PointLight point ({0, 50, -500}, 0xffffff, 1000);
+ThreeDL::AmbientLight ambient (0xffffff, 0.1);
+ThreeDL::PointLight point ({0, 50, -500}, 0xffffff, 10000);
 
-    ThreeDL::Object object (
+ThreeDL::Object object (
         "src/f15.obj",
         ThreeDL::FILEFORMAT::OBJ,
         "src/f15.png"
-    );
+);
+
+void animation(uint64_t ticks) {
+    controller.tick();
+}
+
+int main(const int argc, const char** argv) {
+    renderer.animation = animation;
 
     renderer.add(&ambient);
     renderer.add(&point);

@@ -36,8 +36,6 @@ namespace ThreeDL {
             PointLight(const vec3& position, uint32_t color, const float intensity);
             PointLight() = delete;
 
-            Object model_ = Object("src/light.obj", FILEFORMAT::OBJ, 0xFFFFFF);
-
             ~PointLight() = default;
     };
 };

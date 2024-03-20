@@ -10,10 +10,12 @@
 #include <imgui_impl_sdlrenderer2.h>
 
 #include <iostream>
+#include <mutex>
+#include <thread>
 #include <vector>
 
+#include "gui.hpp"
 #include "camera.hpp"
-#include "controller.hpp"
 #include "GPU/types.h"
 #include "objects.hpp"
 #include "lighting.hpp"
@@ -29,12 +31,6 @@ namespace ThreeDL {
             cl::Buffer, cl::Buffer, cl::Buffer
     >;
 
-    enum class RENDERMODE {
-        WIREFRAME,
-        WIREFRAME_OVERLAY,
-        SHADED
-    };
-
     class Renderer {
         public:
             Renderer(Camera& camera, const uint32_t width, const uint32_t height);
@@ -44,7 +40,7 @@ namespace ThreeDL {
             void add(const Object* object);
             void add(const Light* light);
 
-            void (*animation)(double delta_time) = nullptr;
+            void (*animation)(uint64_t ticks) = nullptr;
 
             void begin();
 
@@ -53,14 +49,20 @@ namespace ThreeDL {
             SDL_Renderer* renderer_;
             SDL_Window* window_;
             SDL_Surface* pixels_surface_;
-            SDL_Texture* pixels_texture_;
+
+            RENDERMODE mode_ = RENDERMODE::SHADED;
 
             State state_;
 
             uint32_t width_;
             uint32_t height_;
 
+            std::mutex render_mutex_;
             Camera& camera_;
+
+            GUI gui_;
+
+            bool client_quit_ = false;
 
             bool gui_enabled_ = false;
             uint64_t enabled_ticks_ = 0;
@@ -85,9 +87,7 @@ namespace ThreeDL {
             cl::Buffer specular_buffer_;
 
             void init();
-
-            bool renderObject(const Object& object, gpu_render_program& program);
-
-            static bool checkQuit();
+            void render();
+            void renderObject(const Object& object, gpu_render_program& program);
     };
 };

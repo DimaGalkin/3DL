@@ -63,7 +63,7 @@ void ThreeDL::Object::fillTextureBuffer(const uint32_t color) {
 }
 
 void ThreeDL::Object::fillTriangleBuffer(
-    const std::string &model_path,
+    const std::string& model_path,
     const ThreeDL::FILEFORMAT ff
 ) {
     switch (ff) {
@@ -90,7 +90,7 @@ std::vector<Triangle> ThreeDL::OBJLoader::load(const std::string& path) {
     std::ifstream vertex_data {path};
 
     if (!vertex_data.is_open())
-        throw std::runtime_error("Could not open OBJ file: " + path);
+        throw std::runtime_error("Problem loading OBJ file (is the path correct?): " + path);
 
     int vertex_index = 1;
     int texture_index = 1;
@@ -123,12 +123,12 @@ std::vector<Triangle> ThreeDL::OBJLoader::load(const std::string& path) {
             std::vector<std::string> tokens = Utils::split(line.substr(3), ' ');
 
             normals.emplace(
-                    normal_index,
-                    Vector3 {
-                            std::stod(tokens[0]),
-                            std::stod(tokens[1]),
-                            std::stod(tokens[2])
-                    }
+                normal_index,
+                Vector3 {
+                    std::stod(tokens[0]),
+                    std::stod(tokens[1]),
+                    std::stod(tokens[2])
+                }
             );
 
             ++normal_index;
@@ -136,12 +136,12 @@ std::vector<Triangle> ThreeDL::OBJLoader::load(const std::string& path) {
             std::vector<std::string> tokens = Utils::split(line.substr(2), ' ');
 
             vertices.emplace(
-                    vertex_index,
-                    Vector3 {
-                            std::stod(tokens[0]),
-                            std::stod(tokens[1]),
-                            std::stod(tokens[2])
-                    }
+                vertex_index,
+                Vector3 {
+                    std::stod(tokens[0]),
+                    std::stod(tokens[1]),
+                    std::stod(tokens[2])
+                }
             );
 
             ++vertex_index;

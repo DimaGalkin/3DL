@@ -31,5 +31,7 @@ ThreeDL::PointLight::PointLight(const vec3& position, uint32_t color, const floa
     type_ = LightType::POINT;
     position_ = position;
     intensity_ = intensity;
+    model_ =  Object("src/light.obj", FILEFORMAT::OBJ, 0xFFFFFF);
+
     Utils::uintToLinear(color, color_);
 }

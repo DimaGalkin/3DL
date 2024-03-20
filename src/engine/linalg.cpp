@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "linalg.hpp"
 
 ThreeDL::Vec3::Vec3(double other_x, double other_y, double other_z)
@@ -25,28 +26,68 @@ Vector3 ThreeDL::Vec3::asGPUType() const {
     return Vector3 {x, y, z};
 }
 
-void ThreeDL::Vec3::rotateX(double angle) {
+void ThreeDL::Vec3::rotateX(const double angle) {
+    double radians = angle * M_PI / 180;
     double temp_y = y;
-    y = y * cos(angle) - z * sin(angle);
-    z = temp_y * sin(angle) + z * cos(angle);
+    y = y * cos(radians) - z * sin(radians);
+    z = temp_y * sin(radians) + z * cos(radians);
 }
 
-void ThreeDL::Vec3::rotateY(double angle) {
+void ThreeDL::Vec3::rotateY(const double angle) {
+    double radians = angle * M_PI / 180;
     double temp_x = x;
-    x = x * cos(angle) + z * sin(angle);
-    z = -temp_x * sin(angle) + z * cos(angle);
+    x = x * cos(radians) + z * sin(radians);
+    z = -temp_x * sin(radians) + z * cos(radians);
 }
 
-void ThreeDL::Vec3::rotateZ(double angle) {
+void ThreeDL::Vec3::rotateZ(const double angle) {
+    double radians = angle * M_PI / 180;
     double temp_x = x;
-    x = x * cos(angle) - y * sin(angle);
-    y = temp_x * sin(angle) + y * cos(angle);
+    x = x * cos(radians) - y * sin(radians);
+    y = temp_x * sin(radians) + y * cos(radians);
 }
 
-void ThreeDL::Vec3::rotate(double x, double y, double z) {
-    rotateY(y);
-    rotateX(x);
-    rotateZ(z);
+void ThreeDL::Vec3::rotate(const double x, const double y, const double z) {
+    switch (order_) {
+        case ROTATEORDER::XYZ:
+            rotateX(x);
+            rotateY(y);
+            rotateZ(z);
+            break;
+
+        case ROTATEORDER::XZY:
+            rotateX(x);
+            rotateZ(z);
+            rotateY(y);
+            break;
+
+        case ROTATEORDER::YXZ:
+            rotateY(y);
+            rotateX(x);
+            rotateZ(z);
+            break;
+
+        case ROTATEORDER::YZX:
+            rotateY(y);
+            rotateZ(z);
+            rotateX(x);
+            break;
+
+        case ROTATEORDER::ZXY:
+            rotateZ(z);
+            rotateX(x);
+            rotateY(y);
+            break;
+
+        case ROTATEORDER::ZYX:
+            rotateZ(z);
+            rotateY(y);
+            rotateX(x);
+            break;
+
+        default:
+            throw std::runtime_error("Invalid rotation order");
+    }
 }
 
 void ThreeDL::Vec3::normalize() {
@@ -144,7 +185,7 @@ Vector2 ThreeDL::Vec2::asGPUType() const {
     return Vector2 {x, y};
 }
 
-void ThreeDL::Vec2::rotate(double angle) {
+void ThreeDL::Vec2::rotate(const double angle) {
     double temp_x = x;
     x = x * cos(angle) - y * sin(angle);
     y = temp_x * sin(angle) + y * cos(angle);

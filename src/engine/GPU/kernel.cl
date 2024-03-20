@@ -5,7 +5,8 @@ typedef unsigned int uint32_t;
 
 void draw_line(
     int ax, int ay, 
-    int bx, int by, 
+    int bx, int by,
+    const struct State* info,
     global int* C
 ) {
     int dx = bx - ax;
@@ -20,11 +21,38 @@ void draw_line(
     double Y = ay;
 
     for (int i = 0; i <= steps; i++) {
-        if (X >= 1920 || X < 0 || Y >= 1080 || Y < 0) continue;
-        C[(int) X + (int) Y * 1920] = 0xff00ff;
+        if (X >= info->width_ || X < 0 || Y >= info->height_ || Y < 0) continue;
+        C[(int) X + (int) Y * info->width_] = 0xffffff;
         X += Xinc;
         Y += Yinc;
     }
+}
+
+void drawWireframeTriangle(
+    struct ScreenTriangle* tri,
+    const struct State* info,
+    global int* C
+) {
+    draw_line(
+        (int)tri->v1.x, (int)tri->v1.y,
+        (int)tri->v2.x, (int)tri->v2.y,
+        info,
+        C
+    );
+
+    draw_line(
+        (int)tri->v2.x, (int)tri->v2.y,
+        (int)tri->v3.x, (int)tri->v3.y,
+        info,
+        C
+    );
+
+    draw_line(
+        (int)tri->v3.x, (int)tri->v3.y,
+        (int)tri->v1.x, (int)tri->v1.y,
+        info,
+        C
+    );
 }
 
 void project (
@@ -32,7 +60,7 @@ void project (
     struct ScreenTriangle* out,
     global const struct State* info
 ) {
-    double fov = 75.0;
+    double fov = info->fov_;
     double dtp = ((double)info->width_ / 2.0) / tan((fov / 2.0) * (M_PI / 180.0)); 
     double h_height = (double)info->height_ / 2.0;
     double h_width = (double)info->width_ / 2.0;
@@ -502,6 +530,11 @@ void draw_texture(
                 specularColors[(int)(j + y * info->width_)] = gsp_tri->specular_color_;
             }
         }
+
+        if (info->mode_ == WIREFRAME_OVERLAY) {
+            C[(int)xMin + (int)y * info->width_] = 0xffffff;
+            C[(int)xMax + (int)y * info->width_] = 0xffffff;
+        }
     }
 }
 
@@ -726,6 +759,11 @@ kernel void gpu_render (
 
                 // copyColours(tri_cpy, &tri_right_clipped[k]);
                 // copyNormals(tri_cpy, &tri_right_clipped[k]);
+
+                if (info->mode_ == WIREFRAME) {
+                    drawWireframeTriangle(&tri_projected, info, C);
+                    continue;
+                }
                 
                 draw_texture (
                     &tri_projected,

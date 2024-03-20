@@ -137,6 +137,11 @@ add_executable(3DL
         src/engine/utils.cpp
         src/engine/utils.hpp
         src/main.cpp
-        src/main.hpp
-        src/engine/controller.cpp
-        src/engine/controller.hpp)
+        src/engine/gui.hpp
+        src/engine/gui.cpp
+)
+
+
+target_link_libraries(3DL SDL2)
+target_link_libraries(3DL SDL2_image)
+target_link_libraries(3DL OpenCL)

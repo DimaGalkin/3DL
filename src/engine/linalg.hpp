@@ -28,10 +28,10 @@ namespace ThreeDL {
 
             Vector3 asGPUType() const;
 
-            void rotateX(double angle);
-            void rotateY(double angle);
-            void rotateZ(double angle);
-            void rotate(double x, double y, double z);
+            void rotateX(const double angle);
+            void rotateY(const double angle);
+            void rotateZ(const double angle);
+            void rotate(const double x, const double y, const double z);
 
             void normalize();
             Vec3 normalized() const;
@@ -67,7 +67,7 @@ namespace ThreeDL {
 
             Vector2 asGPUType() const;
 
-            void rotate(double angle);
+            void rotate(const double angle);
 
             void normalize();
             Vec2 normalized() const;
