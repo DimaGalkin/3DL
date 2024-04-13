@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MATHCL
+#define MATHCL
 
 #ifndef uint32_t
 typedef unsigned int uint32_t;
@@ -107,3 +108,5 @@ struct GPULight {
 
     double intensity_;
 };
+
+#endif

@@ -7,14 +7,14 @@ ThreeDL::GUI::GUI(SDL_Window* window, SDL_Renderer* renderer) {
 }
 
 void ThreeDL::GUI::startFrame() {
-    ImGui_ImplSDLRenderer2_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
+//    ImGui_ImplSDLRenderer2_NewFrame();
+//    ImGui_ImplSDL2_NewFrame();
+//    ImGui::NewFrame();
 }
 
 void ThreeDL::GUI::renderFrame() {
-    ImGui::Render();
-    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+//    ImGui::Render();
+//    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
 }
 
 ThreeDL::GUI::~GUI() {

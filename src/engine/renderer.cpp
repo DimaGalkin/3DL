@@ -13,7 +13,7 @@ ThreeDL::Renderer::Renderer(
 }
 
 ThreeDL::Renderer::Renderer(
-        const ThreeDL::CameraController &controller,
+        const ThreeDL::CameraController& controller,
         const uint32_t width,
         const uint32_t height
 ) : width_(width),
@@ -28,8 +28,6 @@ void ThreeDL::Renderer::init() {
     SDL_Init(SDL_INIT_VIDEO);
     SDL_CreateWindowAndRenderer(width_, height_, 0, &window_, &renderer_);
     SDL_SetWindowTitle(window_, "3DL");
-
-    pixels_surface_ = SDL_CreateRGBSurface(0, width_, height_, 32, 0, 0, 0, 0);
 
     zbuffer_.assign(width_ * height_, -INFINITY);
 
@@ -62,6 +60,15 @@ void ThreeDL::Renderer::begin() {
 
     SDL_Event event;
 
+    IMGUI_CHECKVERSION();
+    ImGuiContext* cont = ImGui::CreateContext();
+    ImGui::SetCurrentContext(cont);
+    ImGuiIO &io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplSDL2_InitForSDLRenderer(window_, renderer_);
+    ImGui_ImplSDLRenderer2_Init(renderer_);
+
     while (!client_quit_) {
         SDL_PollEvent(&event);
 
@@ -69,7 +76,37 @@ void ThreeDL::Renderer::begin() {
             client_quit_ = true;
         }
 
-        //ImGui_ImplSDL2_ProcessEvent(&event);
+        if (event.type == SDL_KEYDOWN) {
+            if (event.key.keysym.sym == SDLK_F12 && SDL_GetTicks64() - enabled_ticks_ > 5) {
+                 gui_enabled_ = !gui_enabled_;
+            } else {
+                enabled_ticks_ = SDL_GetTicks64();
+            }
+        }
+
+        ImGui_ImplSDL2_ProcessEvent(&event);
+
+        if (frame_ready_ && gui_enabled_) {
+            ImGui_ImplSDLRenderer2_NewFrame();
+            ImGui_ImplSDL2_NewFrame();
+            ImGui::NewFrame();
+
+            ImGui::ShowDemoWindow();
+
+            texture_ = SDL_CreateTextureFromSurface(renderer_, pixels_surface_);
+            SDL_SetTextureBlendMode(texture_, SDL_BLENDMODE_BLEND);
+            SDL_RenderCopy(renderer_, texture_, NULL, NULL);
+            SDL_DestroyTexture(texture_);
+
+            ImGui::Render();
+            ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+
+            SDL_RenderPresent(renderer_);
+            SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
+            SDL_RenderClear(renderer_);
+
+            frame_ready_ = false;
+        }
 
         uint64_t delta_ticks = SDL_GetTicks64() - ticks_at_last_frame;
 
@@ -86,6 +123,8 @@ void ThreeDL::Renderer::begin() {
 }
 
 void ThreeDL::Renderer::render() {
+    pixels_surface_ = SDL_CreateRGBSurface(0, width_, height_, 32, 0, 0, 0, 0);
+
     std::cout << "Starting Kernel Compilation..." << std::endl;
 
     cl::Program render_program = ocl_utils_.buildProgram(
@@ -102,22 +141,8 @@ void ThreeDL::Renderer::render() {
     gpu_render_program gpu_render (cl::Kernel(render_program, "gpu_render"));
     gpu_lighting_program gpu_lighting (cl::Kernel(lighting_program, "gpu_lighting"));
 
-    gui_ = GUI(window_, renderer_);
-
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO(); (void)io;
-    ImGui::StyleColorsDark();
-
-    ImGui_ImplSDL2_InitForSDLRenderer(window_, renderer_);
-    ImGui_ImplSDLRenderer2_Init(renderer_);
-
     while (!client_quit_) {
         bool show_gui = gui_enabled_;
-
-        if (show_gui) {
-            gui_.startFrame();
-        }
 
         pixels_buffer_ = cl::Buffer(
                 ocl_utils_.context_,
@@ -238,8 +263,7 @@ void ThreeDL::Renderer::render() {
 
         if (show_gui) {
             draw_surface = pixels_surface_;
-            SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
-            SDL_RenderClear(renderer_);
+            frame_ready_ = false;
         } else {
             draw_surface = SDL_GetWindowSurface(window_);
         }
@@ -247,7 +271,6 @@ void ThreeDL::Renderer::render() {
         auto* display = reinterpret_cast<uint32_t*>(draw_surface->pixels);
 
         SDL_LockSurface(draw_surface);
-
         ocl_utils_.queue_.enqueueReadBuffer(
                 pixels_buffer_,
                 CL_TRUE,
@@ -255,18 +278,10 @@ void ThreeDL::Renderer::render() {
                 sizeof(uint32_t) * width_ * height_,
                 display
         );
-
         SDL_UnlockSurface(draw_surface);
 
         if (show_gui) {
-            SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer_, draw_surface);
-            SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
-            SDL_RenderCopy(renderer_, texture, nullptr, nullptr);
-            SDL_DestroyTexture(texture);
-
-            gui_.renderFrame();
-
-            SDL_RenderPresent(renderer_);
+            frame_ready_ = true;
         } else {
             SDL_UpdateWindowSurface(window_);
         }
@@ -338,9 +353,9 @@ void ThreeDL::Renderer::renderObject(const ThreeDL::Object& object, gpu_render_p
 ThreeDL::Renderer::~Renderer() {
     SDL_Quit();
 
-    ImGui_ImplSDL2_Shutdown();
-    ImGui_ImplSDLRenderer2_Shutdown();
-    ImGui::DestroyContext();
+//    ImGui_ImplSDL2_Shutdown();
+//    ImGui_ImplSDLRenderer2_Shutdown();
+//    ImGui::DestroyContext();
 
     SDL_DestroyRenderer(renderer_);
     SDL_DestroyWindow(window_);

@@ -27,24 +27,24 @@ ThreeDL::OpenCLUtils::OpenCLUtils() {
 }
 
 std::string ThreeDL::OpenCLUtils::readKernel(const std::string& path) {
-    std::ifstream kernel_file { path };
-
-    if (!kernel_file.is_open()) {
-        throw std::runtime_error("Failed to open file for reading: " + path);
-    }
-
-    std::string kernel_source {std::istreambuf_iterator<char>(kernel_file), std::istreambuf_iterator<char>()};
-
-    kernel_file.close();
-
-    return kernel_source;
+//    std::ifstream kernel_file { path };
+//
+//    if (!kernel_file.is_open()) {
+//        throw std::runtime_error("Failed to open file for reading: " + path);
+//    }
+//
+//    std::string kernel_source {std::istreambuf_iterator<char>(kernel_file), std::istreambuf_iterator<char>()};
+//
+//    kernel_file.close();
+    #include "iact.h"
+    return kernel_include_source;
 }
 
 cl::Program ThreeDL::OpenCLUtils::buildProgram(const std::string& kernel, const std::string& path) const {
     std::string kernel_source = readKernel(path);
 
     cl::Program::Sources sources;
-    sources.emplace_back(kernel_source.c_str(),kernel_source.length());
+    sources.emplace_back(kernel_source.c_str(), kernel_source.length());
 
     cl::Program program (context_, sources);
 

@@ -49,6 +49,7 @@ namespace ThreeDL {
             SDL_Renderer* renderer_;
             SDL_Window* window_;
             SDL_Surface* pixels_surface_;
+            SDL_Texture* texture_;
 
             RENDERMODE mode_ = RENDERMODE::SHADED;
 
@@ -64,7 +65,9 @@ namespace ThreeDL {
 
             bool client_quit_ = false;
 
-            bool gui_enabled_ = false;
+            bool frame_ready_ = false;
+
+            bool gui_enabled_ = true;
             uint64_t enabled_ticks_ = 0;
 
             std::vector<double> zbuffer_;

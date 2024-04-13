@@ -1,7 +1,3 @@
-#pragma once
-
-#include "types.h"
-
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -238,6 +234,12 @@ void calcUv(
     out->y = uv1->y + (uv2->y - uv1->y) * t;
 }
 
+double absd(
+    double a
+) {
+    return a < 0 ? -a : a;
+}
+
 void intersects(
     struct Plane* plane,
     struct Ray* ray,
@@ -246,7 +248,7 @@ void intersects(
     double n = Vec3Dot(&plane->normal_, &plane->position_) - Vec3Dot(&plane->normal_, &ray->origin_);
     double d = Vec3Dot(&plane->normal_, &ray->direction_);
 
-    if (d == 0) {
+    if (absd(d) < 0.0001) {
         out->intersect_.x = 0;
         out->intersect_.y = 0;
         out->intersect_.z = 0;

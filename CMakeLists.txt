@@ -8,6 +8,15 @@ include_directories(include/imgui)
 include_directories(include/SDL2)
 include_directories(src/engine/GPU)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+
+# run python script to generate opencl code every time
+
+add_custom_target(iact
+        COMMAND python3 ${CMAKE_SOURCE_DIR}/src/engine/GPU/iact.py
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src/engine/GPU
+)
+
 add_executable(3DL
         include/imgui/imconfig.h
         include/imgui/imgui.cpp
@@ -139,8 +148,9 @@ add_executable(3DL
         src/main.cpp
         src/engine/gui.hpp
         src/engine/gui.cpp
+        src/engine/GPU/iact.h
 )
-
+add_dependencies(3DL iact)
 
 target_link_libraries(3DL SDL2)
 target_link_libraries(3DL SDL2_image)

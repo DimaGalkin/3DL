@@ -1,6 +1,6 @@
 #include "utils.hpp"
 
-std::vector<std::string> ThreeDL::Utils::split(const std::string &str, char delim) {
+std::vector<std::string> ThreeDL::Utils::split(const std::string &str, const char delim) {
     std::vector<std::string> result;
     std::stringstream ss (str);
     std::string item;

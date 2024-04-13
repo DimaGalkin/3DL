@@ -1,10 +1,23 @@
-#include "src/engine/GPU/types.h"
-#include "src/engine/GPU/mathcl.h"
-
 typedef unsigned int uint32_t;
 
+int abs_m(int in) {
+    if (in < 0) {
+        return in * -1;
+    }
+
+    return in;
+}
+
+double abs_d(double in) {
+    if (in < 0) {
+        return in * -1;
+    }
+
+    return in;
+}
+
 void draw_line(
-    int ax, int ay, 
+    int ax, int ay,
     int bx, int by,
     const struct State* info,
     global int* C
@@ -61,10 +74,10 @@ void project (
     global const struct State* info
 ) {
     double fov = info->fov_;
-    double dtp = ((double)info->width_ / 2.0) / tan((fov / 2.0) * (M_PI / 180.0)); 
+    double dtp = ((double)info->width_ / 2.0) / tan((fov / 2.0) * (M_PI / 180.0));
     double h_height = (double)info->height_ / 2.0;
     double h_width = (double)info->width_ / 2.0;
-    
+
     double t1 = (dtp - 0) / in->v1.z;
     double t2 = (dtp - 0) / in->v2.z;
     double t3 = (dtp - 0) / in->v3.z;
@@ -98,7 +111,7 @@ unsigned char clip(
     Vec3Subtract(&dir1, &tri->v1, &dir1);
     Vec3Subtract(&dir2, &tri->v2, &dir2);
     Vec3Subtract(&dir3, &tri->v3, &dir3);
-    
+
     struct Ray ray1 = {tri->v1, dir1};
     struct Ray ray2 = {tri->v2, dir2};
     struct Ray ray3 = {tri->v3, dir3};
@@ -138,7 +151,21 @@ unsigned char clip(
         !info1.valid_ && info2.valid_ && !info3.valid_,
         info1.valid_ && !info2.valid_ && !info3.valid_
     ) {
-        return 0;
+        bool inside = isInside(&plane->normal_, &plane->position_, tri->v1);
+
+        if (inside) {
+            out_tris[0].v1 = tri->v1;
+            out_tris[0].v2 = info3.intersect_;
+            out_tris[0].v3 = info3.intersect_;
+
+            out_tris[0].t1 = tri->t1;
+            out_tris[0].t2 = tri->t3;
+            out_tris[0].t3 = tri->t3;
+
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
     if (info1.valid_ && info2.valid_) {
@@ -256,10 +283,10 @@ double interpolateZ(
     double denom = p2->x - p1->x;
     double t;
 
-    if (denom == 0) {
+    if (abs_d(denom) < 0.0001) {
         denom = p2->y - p1->y;
 
-        if (denom == 0) {
+        if (abs_d(denom) < 0.0001) {
             return p1->depth_info_;
         }
 
@@ -279,6 +306,13 @@ double intersectVec2(
     struct Vector2* out
 ) {
     double t = (b_dir->x * (a_pos->y - b_pos->y) - b_dir->y * (a_pos->x - b_pos->x)) / (a_dir->x * b_dir->y - a_dir->y * b_dir->x);
+
+    if (abs_d(t) < 0.0001) {
+        out->x = a_pos->x;
+        out->y = a_pos->y;
+        return t;
+    }
+
     struct Vector2 res = *a_dir;
 
     Vec2Multiply(&res, t, &res);
@@ -288,22 +322,6 @@ double intersectVec2(
     out->y = res.y;
 
     return t;
-}
-
-int abs_m(int in) {
-    if (in < 0) {
-        return in * -1;
-    }
-
-    return in;
-}
-
-double abs_d(double in) {
-    if (in < 0) {
-        return in * -1;
-    }
-
-    return in;
 }
 
 void draw_texture(
@@ -412,6 +430,8 @@ void draw_texture(
     struct Line line1 = {tri->v1, tri->v3};
     struct Line line2 = {tri->v2, tri->v1};
 
+    int xMaxx;
+
     for (int i = (int)yMax; i > yMin; --i) {
         if (floor(yMid) == i) {
             line_two = tri->v2;
@@ -478,6 +498,7 @@ void draw_texture(
         double xMin = (int)intersect1.x;
         double xMax = (int)intersect2.x;
         double y = (int)intersect1.y;
+        int xMaxx = xMax;
 
         double uvMax = (uvIntersect1.x > uvIntersect2.x) ? uvIntersect1.x : uvIntersect2.x;
         double uvMin = (uvIntersect1.x < uvIntersect2.x) ? uvIntersect1.x : uvIntersect2.x;
@@ -507,7 +528,15 @@ void draw_texture(
             uint32_t u = floor(uvIntersect3.x * info->texture_width_);
             uint32_t v = info->texture_height_ - floor(uvIntersect3.y * info->texture_height_);
 
-            if ((int)y < info->height_ && (int)y >= 0 && j < info->width_ && j >= 0 && intersect3.depth_info_ > zbuffer[(int)(j + y * info->width_)]) {
+            if ((int)y < info->height_ && (int)y >= 0 && j < info->width_ && j >= 0 && intersect3.depth_info_ > zbuffer[(int)(j + y * info->width_)]) {                
+                if (j == xMin && info->mode_ == WIREFRAME_OVERLAY) {
+                    C[(int)(j + y * info->width_)] = 0xffffff;
+                    continue;
+                } else if (j == xMax && info->mode_ == WIREFRAME_OVERLAY) {
+                    C[(int)(j + y * info->width_)] = 0xffffff;
+                    continue;
+                }
+
                 if (u > info->texture_width_ || u < 0 || v > info->texture_height_ || v < 0) {
                     C[(int)(j + y * info->width_)] |= 0x333333;
                     continue;
@@ -529,11 +558,6 @@ void draw_texture(
                 diffuseColors[(int)(j + y * info->width_)] = gsp_tri->diffuse_color_;
                 specularColors[(int)(j + y * info->width_)] = gsp_tri->specular_color_;
             }
-        }
-
-        if (info->mode_ == WIREFRAME_OVERLAY) {
-            C[(int)xMin + (int)y * info->width_] = 0xffffff;
-            C[(int)xMax + (int)y * info->width_] = 0xffffff;
         }
     }
 }
@@ -667,7 +691,7 @@ void kernel gpu_lighting (
     r = min(r, 255);
     g = min(g, 255);
     b = min(b, 255);
-    
+
     pixels[pixel_num] = (r << 16) | (g << 8) | b;
 }
 
@@ -682,8 +706,13 @@ kernel void gpu_render (
     global struct uint* diffuseColors,
     global struct uint* specularColors,
     global uint* C
-){
-    int gid = get_global_id(0);
+) {
+    // get id of the current triangle in 3 dimensions
+    const int zero = get_global_id(0);
+    const int one = get_global_id(1);
+    const int two = get_global_id(2);
+
+    const int gid = get_global_offset(0) + zero + get_global_size(0) * one + get_global_size(0) * get_global_size(1) * two;
 
     // make a copy of the triangle
     struct Triangle* tri_cpy = &A[gid];
@@ -709,12 +738,14 @@ kernel void gpu_render (
     struct Triangle tri_near_clipped[2];
     struct Triangle tri_left_clipped[2];
     struct Triangle tri_right_clipped[2];
+    struct Triangle tri_bottom_clipped[2];
+    struct Triangle tri_top_clipped[2];
 
     struct Plane near = {
         {0, 0, -1},
         {0, 0, -1},
         {1, 0, 0}
-    
+
     };
 
     struct Plane left = {
@@ -729,13 +760,38 @@ kernel void gpu_render (
         {0, 0, -1}
     };
 
+    struct Plane bottom = {
+        {0, 1, 0},
+        {0, 0, 0},
+        {0, 0, -1}
+    };
+
+    struct Plane top = {
+        {0, -1, 0},
+        {0, 0, 0},
+        {0, 0, -1}
+    };
+
     // Vec3Rotateate left and right planes as they are at the angle of fov/2
-    struct Vector3 r = {0, -info->fov_, 0};
+    struct Vector3 r = {0, -info->fov_/2, 0};
     Vec3Rotate(&left.direction_, &r);
     Vec3Rotate(&left.normal_, &r);
-    r.y = r.y * -1;
+    r.y = r.y * -0.99;
     Vec3Rotate(&right.direction_, &r);
     Vec3Rotate(&right.normal_, &r);
+
+    double half_width = info->width_ / 2;
+    double half_height = info->height_ / 2;
+    double half_fov = info->fov_ / 2;
+
+    double horiz_fov = atan((half_height * tan(half_fov * (M_PI / 180.0)))/(half_width)) * (180.0 / M_PI);
+
+    struct Vector3 r2 = {-horiz_fov, 0, 0};
+    Vec3Rotate(&bottom.direction_, &r2);
+    Vec3Rotate(&bottom.normal_, &r2);
+    r2.x = r2.x * -1;
+    Vec3Rotate(&top.direction_, &r2);
+    Vec3Rotate(&top.normal_, &r2);
 
     unsigned char n_triangles = clip(tri_cpy, &near, &tri_near_clipped);
     struct ScreenTriangle tri_projected;
@@ -755,28 +811,40 @@ kernel void gpu_render (
             if (n_triangles3 == 0) continue;
 
             for (int k = 0; k < n_triangles3; k++) {
-                project(&tri_right_clipped[k], &tri_projected, info);
+                int n_triangles4 = clip(&tri_right_clipped[k], &bottom, &tri_bottom_clipped);
 
-                // copyColours(tri_cpy, &tri_right_clipped[k]);
-                // copyNormals(tri_cpy, &tri_right_clipped[k]);
+                if (n_triangles4 == 0) continue;
 
-                if (info->mode_ == WIREFRAME) {
-                    drawWireframeTriangle(&tri_projected, info, C);
-                    continue;
+                for (int l = 0; l < n_triangles4; l++) {
+                    int n_triangles5 = clip(&tri_bottom_clipped[l], &top, &tri_top_clipped);
+
+                    if (n_triangles5 == 0) continue;
+
+                    for (int m = 0; m < n_triangles5; m++) {
+                        project(&tri_top_clipped[m], &tri_projected, info);
+
+                        // copyColours(tri_cpy, &tri_top_clipped[m]);
+                        // copyNormals(tri_cpy, &tri_top_clipped[m]);
+
+                        if (info->mode_ == WIREFRAME) {
+                            drawWireframeTriangle(&tri_projected, info, C);
+                            continue;
+                        }
+
+                        draw_texture (
+                            &tri_projected,
+                            &tri_top_clipped[m],
+                            zbuffer,
+                            info,
+                            texture,
+                            normals,
+                            positions,
+                            diffuseColors,
+                            specularColors,
+                            C
+                        );
+                    }
                 }
-                
-                draw_texture (
-                    &tri_projected,
-                    &tri_right_clipped[k],
-                    zbuffer,
-                    info,
-                    texture,
-                    normals,
-                    positions,
-                    diffuseColors,
-                    specularColors,
-                    C
-                );
             }
         }
     }

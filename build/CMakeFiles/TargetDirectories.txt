@@ -1,0 +1,3 @@
+/home/dima/Projects/3DL/build/CMakeFiles/3DL.dir
+/home/dima/Projects/3DL/build/CMakeFiles/edit_cache.dir
+/home/dima/Projects/3DL/build/CMakeFiles/rebuild_cache.dir

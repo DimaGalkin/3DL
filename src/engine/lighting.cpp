@@ -15,7 +15,6 @@ GPULight ThreeDL::Light::asGPUType() const {
         .direction_ = direction_.asGPUType(),
         .color_ = Utils::linearToUint(color_[0], color_[1], color_[2]),
         .intensity_ = intensity_
-
     };
 
     return light;
@@ -31,7 +30,7 @@ ThreeDL::PointLight::PointLight(const vec3& position, uint32_t color, const floa
     type_ = LightType::POINT;
     position_ = position;
     intensity_ = intensity;
-    model_ =  Object("src/light.obj", FILEFORMAT::OBJ, 0xFFFFFF);
+    model_ =  Object("../src/light.obj", FILEFORMAT::OBJ, color);
 
     Utils::uintToLinear(color, color_);
 }
