@@ -35,6 +35,7 @@ namespace ThreeDL {
 
             vec3 position_;
             vec3 rotation_;
+            vec3 centre_;
 
             uint32_t texture_w_;
             uint32_t texture_h_;
@@ -44,6 +45,7 @@ namespace ThreeDL {
 
             ~Object() = default;
         private:
+            void findCentre();
             void fillTextureBuffer(const std::string& texture_path);
             void fillTextureBuffer(const uint32_t color);
             void fillTriangleBuffer(const std::string& model_path, const FILEFORMAT format);

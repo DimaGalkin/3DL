@@ -6,8 +6,7 @@ ThreeDL::Renderer::Renderer(
         const uint32_t height
 ) : width_(width),
     height_(height),
-    camera_(camera),
-    gui_(nullptr, nullptr)
+    camera_(camera)
 {
     init();
 }
@@ -18,8 +17,7 @@ ThreeDL::Renderer::Renderer(
         const uint32_t height
 ) : width_(width),
     height_(height),
-    camera_(controller.getCamera()),
-    gui_(nullptr, nullptr)
+    camera_(controller.getCamera())
 {
     init();
 }
@@ -49,14 +47,148 @@ void ThreeDL::Renderer::add(const ThreeDL::Object *object) {
     render_queue_.push_back(object);
 }
 
-void ThreeDL::Renderer::add(const ThreeDL::Light *light) {
+void ThreeDL::Renderer::add(ThreeDL::Light *light) {
     lights_.push_back(light);
+}
+
+void ThreeDL::Renderer::renderGUIWindows(uint64_t fps) {
+    int full_height = height_ - 19;
+    int renderer_window_height = (full_height / 5) * 1;
+    int camera_window_height = (full_height / 5) * 1.25;
+    int lights_window_height = (full_height / 5) * 2;
+    int animation_window_height = (full_height / 5) * 0.75;
+
+    int renderer_window_y = 19;
+    int camera_window_y = renderer_window_y + renderer_window_height;
+    int lights_window_y = camera_window_y + camera_window_height;
+    int animation_window_y = lights_window_y + lights_window_height;
+
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("Lights"))
+        {
+            if (lights_.empty()) {
+                ImGui::Text("No Lights available!");
+            } else {
+                for (auto &light: lights_) {
+                    if (ImGui::MenuItem(light->name_.c_str())) {
+                        selected_light_ = light;
+                    }
+                }
+            }
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMainMenuBar();
+    }
+
+    ImGui::SetNextWindowPos(ImVec2(0, renderer_window_y), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(300, renderer_window_height));
+
+    ImGui::Begin("Renderer", nullptr,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+
+    ImGui::Text("FPS: %ld", fps);
+
+    ImGui::Text("Renderer Resolution: %dx%d", width_, height_);
+    ImGui::Text("Renderer Mode: %s", mode_ == RENDERMODE::SHADED ? "Shaded" : "Wireframe");
+
+    if (ImGui::Button("Toggle Mode")) {
+        mode_ = mode_ == RENDERMODE::SHADED ? RENDERMODE::WIREFRAME : RENDERMODE::SHADED;
+    }
+
+    ImGui::End();
+
+    ImGui::SetNextWindowPos(ImVec2(0, camera_window_y), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(300, camera_window_height));
+
+    ImGui::Begin("Camera", nullptr,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+
+    ImGui::Text("Camera Position:");
+    ImGui::Text("   X: %f", camera_.position_.x);
+    ImGui::Text("   Y: %f", camera_.position_.y);
+    ImGui::Text("   Z: %f", camera_.position_.z);
+    ImGui::Text("\n");
+
+    ImGui::Text("Camera Rotation:");
+    ImGui::Text("   X: %f", camera_.rotation_.x);
+    ImGui::Text("   Y: %f", camera_.rotation_.y);
+    ImGui::Text("   Z: %f", camera_.rotation_.z);
+    ImGui::Text("\n");
+
+    ImGui::Text("Camera FOV: %f", camera_.fov_);
+    //fov slider
+    ImGui::SliderFloat("FOV", &camera_.fov_, 0, 180);
+
+    ImGui::End();
+
+    ImGui::SetNextWindowPos(ImVec2(0, animation_window_y), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(300, animation_window_height));
+
+    ImGui::Begin("Animation", nullptr,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+
+    ImGui::Text("Animation Callback: %s", animation == nullptr ? "None" : "Set");
+
+    if (ImGui::Button("Toggle Animation")) {
+        anim_enabled_ = !anim_enabled_;
+    }
+
+    ImGui::End();
+
+    ImGui::SetNextWindowPos(ImVec2(0, lights_window_y), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(300, lights_window_height));
+
+    ImGui::Begin("Light", nullptr,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+
+    if (lights_.empty()) {
+        ImGui::Text("Nothing to show here!");
+    } else if (selected_light_ != nullptr) {
+        ImGui::Text("Selected Light: %s", selected_light_->name_.c_str());
+
+        if (selected_light_->type_ == LightType::POINT) {
+            ImGui::Text("Light Type: Point");
+        } else {
+            ImGui::Text("Light Type: Ambient");
+        }
+        ImGui::Text("\n");
+
+        ImGui::Text("Light Position:");
+        ImGui::Text("   X: %f", selected_light_->position_.x);
+        ImGui::Text("   Y: %f", selected_light_->position_.y);
+        ImGui::Text("   Z: %f", selected_light_->position_.z);
+        ImGui::Text("\n");
+
+        ImGui::ColorPicker3("Light Color", selected_light_->color_);
+        ImGui::Text("\n");
+
+        ImGui::Text("Light Intensity: %f", selected_light_->intensity_);
+
+        if (selected_light_->type_ == LightType::AMBIENT) {
+            ImGui::SliderFloat("Intensity", &selected_light_->intensity_, 0, 1);
+        } else {
+            ImGui::SliderFloat("Intensity", &selected_light_->intensity_, 0, 100000);
+        }
+        ImGui::Text("\n");
+
+        if (ImGui::Button("Toggle Model Visibility")) {
+            selected_light_->model_enabled_ = !selected_light_->model_enabled_;
+        }
+
+        if (ImGui::Button("Delete Light")) {
+            lights_.erase(std::remove(lights_.begin(), lights_.end(), selected_light_), lights_.end());
+            selected_light_ = nullptr;
+        }
+    } else {
+        selected_light_ = lights_[0];
+    }
+
+    ImGui::End();
 }
 
 void ThreeDL::Renderer::begin() {
     std::thread render_thread (&ThreeDL::Renderer::render, this);
 
     uint64_t ticks_at_last_frame = 0;
+    uint64_t ticks_at_last_anim = 0;
 
     SDL_Event event;
 
@@ -77,7 +209,7 @@ void ThreeDL::Renderer::begin() {
         }
 
         if (event.type == SDL_KEYDOWN) {
-            if (event.key.keysym.sym == SDLK_F12 && SDL_GetTicks64() - enabled_ticks_ > 5) {
+            if (event.key.keysym.sym == SDLK_F12 && SDL_GetTicks64() - enabled_ticks_ > 10) {
                  gui_enabled_ = !gui_enabled_;
             } else {
                 enabled_ticks_ = SDL_GetTicks64();
@@ -86,16 +218,20 @@ void ThreeDL::Renderer::begin() {
 
         ImGui_ImplSDL2_ProcessEvent(&event);
 
+        uint64_t delta_ticks = SDL_GetTicks64() - ticks_at_last_frame;
+        uint64_t animation_ticks = SDL_GetTicks64() - ticks_at_last_anim;
+
         if (frame_ready_ && gui_enabled_) {
+
             ImGui_ImplSDLRenderer2_NewFrame();
             ImGui_ImplSDL2_NewFrame();
             ImGui::NewFrame();
 
-            ImGui::ShowDemoWindow();
+            renderGUIWindows(1000 / delta_ticks);
 
             texture_ = SDL_CreateTextureFromSurface(renderer_, pixels_surface_);
             SDL_SetTextureBlendMode(texture_, SDL_BLENDMODE_BLEND);
-            SDL_RenderCopy(renderer_, texture_, NULL, NULL);
+            SDL_RenderCopy(renderer_, texture_, nullptr, nullptr);
             SDL_DestroyTexture(texture_);
 
             ImGui::Render();
@@ -106,17 +242,18 @@ void ThreeDL::Renderer::begin() {
             SDL_RenderClear(renderer_);
 
             frame_ready_ = false;
+            ticks_at_last_frame = SDL_GetTicks64();
         }
 
-        uint64_t delta_ticks = SDL_GetTicks64() - ticks_at_last_frame;
+        if (animation_ticks == 0) continue;
 
-        if (delta_ticks == 0) continue;
+        if (anim_enabled_ && animation != nullptr) {
+            render_mutex_.lock();
+            animation(animation_ticks);
+            render_mutex_.unlock();
+        }
 
-        render_mutex_.lock();
-        animation(delta_ticks);
-        render_mutex_.unlock();
-
-        ticks_at_last_frame = SDL_GetTicks64();
+        ticks_at_last_anim = SDL_GetTicks64();
     }
 
     render_thread.join();
@@ -231,11 +368,15 @@ void ThreeDL::Renderer::render() {
         }
 
         for (const auto& light : lights_) {
-            if (light->type_ != LightType::POINT) continue;
+            if (light->type_ != LightType::POINT || !light->model_enabled_) continue;
 
             render_mutex_.lock();
 
             Object model = light->model_;
+            if (model.texture_w_ == 1 && model.texture_h_ == 1) {
+                model.texture_[0] = Utils::linearToUint(light->color_[0], light->color_[1], light->color_[2]);
+            }
+
             model.position_ = light->position_;
 
             render_mutex_.unlock();

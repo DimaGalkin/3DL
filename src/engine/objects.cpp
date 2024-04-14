@@ -13,6 +13,7 @@ ThreeDL::Object::Object(
 {
     fillTriangleBuffer(model_path, ff);
     fillTextureBuffer(color);
+    findCentre();
 }
 
 
@@ -27,6 +28,7 @@ ThreeDL::Object::Object(
 {
     fillTriangleBuffer(model_path, ff);
     fillTextureBuffer(texture_path);
+    findCentre();
 }
 
 void ThreeDL::Object::fillTextureBuffer(const std::string& texture_path) {
@@ -60,6 +62,26 @@ void ThreeDL::Object::fillTextureBuffer(const uint32_t color) {
 
     texture_w_ = 1;
     texture_h_ = 1;
+}
+
+void ThreeDL::Object::findCentre() {
+    double avg_x = 0;
+    double avg_y = 0;
+    double avg_z = 0;
+    uint64_t total = 0;
+
+    for (const auto& triangle : triangles_) {
+        total += 3;
+        avg_x += triangle.v1.x + triangle.v2.x + triangle.v3.x;
+        avg_y += triangle.v1.y + triangle.v2.y + triangle.v3.y;
+        avg_z += triangle.v1.z + triangle.v2.z + triangle.v3.z;
+    }
+
+    avg_x /= total;
+    avg_y /= total;
+    avg_z /= total;
+
+    centre_ = {avg_x, avg_y, avg_z};
 }
 
 void ThreeDL::Object::fillTriangleBuffer(

@@ -14,7 +14,6 @@
 #include <thread>
 #include <vector>
 
-#include "gui.hpp"
 #include "camera.hpp"
 #include "GPU/types.h"
 #include "objects.hpp"
@@ -22,6 +21,7 @@
 #include "GPU/openclutils.hpp"
 
 namespace ThreeDL {
+    // TODO: Add comment with all the names of parameters in order
     using gpu_render_program = cl::compatibility::make_kernel<
             cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer,
             cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer
@@ -31,17 +31,44 @@ namespace ThreeDL {
             cl::Buffer, cl::Buffer, cl::Buffer
     >;
 
+    /**
+     * @class Renderer
+     * @about Encapsulates a 3D scene, provides debugging tools (GUI) and uses OpenCL to render the scene.
+     */
     class Renderer {
         public:
+            /**
+             * @method Renderer Constructor
+             * @about This constructor takes a reference to a camera, not const as renderer may adjust internal values.
+            */
             Renderer(Camera& camera, const uint32_t width, const uint32_t height);
+
+            /**
+              * @method Renderer Constructor
+              * @about This constructor takes a reference to a camera controller, this will extract the camera reference from the controller.
+            */
             Renderer(const CameraController& controller, const uint32_t width, const uint32_t height);
+
+            // Need camera and size info
             Renderer() = delete;
 
+            /**
+             * @method add
+             * @about adds an Object (triangles & texture) or a light to the render pipeline.
+            */
             void add(const Object* object);
-            void add(const Light* light);
+            void add(Light* light);
 
+            /**
+             * @method animation
+             * @about user defined method called every millisecond, can be used to create moving objects.
+            */
             void (*animation)(uint64_t ticks) = nullptr;
 
+            /**
+             * @method begin
+             * @about Creates SDL window and stats scanning inputs and launches render thread which makes calls to GPU.
+            */
             void begin();
 
             ~Renderer();
@@ -61,20 +88,19 @@ namespace ThreeDL {
             std::mutex render_mutex_;
             Camera& camera_;
 
-            GUI gui_;
-
+            bool anim_enabled_ = true;
             bool client_quit_ = false;
-
             bool frame_ready_ = false;
-
             bool gui_enabled_ = true;
             uint64_t enabled_ticks_ = 0;
+
+            Light* selected_light_ = nullptr;
 
             std::vector<double> zbuffer_;
             std::vector<const Object*> render_queue_;
 
             std::vector<GPULight> gpu_lights_;
-            std::vector<const Light*> lights_;
+            std::vector<Light*> lights_;
 
             OpenCLUtils ocl_utils_;
 
@@ -90,6 +116,7 @@ namespace ThreeDL {
             cl::Buffer specular_buffer_;
 
             void init();
+            void renderGUIWindows(uint64_t fps);
             void render();
             void renderObject(const Object& object, gpu_render_program& program);
     };

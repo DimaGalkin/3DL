@@ -146,8 +146,6 @@ add_executable(3DL
         src/engine/utils.cpp
         src/engine/utils.hpp
         src/main.cpp
-        src/engine/gui.hpp
-        src/engine/gui.cpp
         src/engine/GPU/iact.h
 )
 add_dependencies(3DL iact)

@@ -10,15 +10,24 @@ ThreeDL::CameraController controller (
 
 ThreeDL::Renderer renderer (controller, 1920, 1080);
 
-ThreeDL::vec3 light_pos {-135, 50, -195};
-
-ThreeDL::AmbientLight ambient (0xffffff, 0);
-ThreeDL::PointLight point (light_pos, 0xffffff, 10000);
-
 ThreeDL::Object object (
-        "../src/f4.obj",
+        "../src/f15.obj",
         ThreeDL::FILEFORMAT::OBJ,
-        "../src/f4.png"
+        "../src/f15.png"
+);
+
+ThreeDL::vec3 light_pos {object.centre_.x, object.centre_.y + 50, object.centre_.z};
+
+ThreeDL::AmbientLight ambient (
+        "ambient",
+        0xffffff,
+        0
+);
+ThreeDL::PointLight point (
+        "point",
+        light_pos,
+        0xffffff,
+        10000
 );
 
 int tick = 0;

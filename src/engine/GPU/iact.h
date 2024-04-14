@@ -1176,7 +1176,6 @@ kernel void gpu_render (
     global struct uint* specularColors,
     global uint* C
 ) {
-    C[1000] = 0xff;
     // get id of the current triangle in 3 dimensions
     const int zero = get_global_id(0);
     const int one = get_global_id(1);

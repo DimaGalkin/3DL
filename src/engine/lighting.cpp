@@ -5,6 +5,7 @@ ThreeDL::Light::Light()
       position_ {0, 0, 0},
       direction_ {0, 0, 0},
       intensity_ {0},
+      name_("default"),
       color_ {0, 0, 0}
 {}
 
@@ -20,13 +21,15 @@ GPULight ThreeDL::Light::asGPUType() const {
     return light;
 }
 
-ThreeDL::AmbientLight::AmbientLight(uint32_t color, float intensity) {
+ThreeDL::AmbientLight::AmbientLight(std::string name, uint32_t color, float intensity) {
+    name_ = name;
     type_ = LightType::AMBIENT;
     intensity_ = intensity;
     Utils::uintToLinear(color, color_);
 }
 
-ThreeDL::PointLight::PointLight(const vec3& position, uint32_t color, const float intensity) {
+ThreeDL::PointLight::PointLight(std::string name, const vec3& position, uint32_t color, const float intensity) {
+    name_ = name;
     type_ = LightType::POINT;
     position_ = position;
     intensity_ = intensity;

@@ -22,7 +22,7 @@ namespace ThreeDL {
             vec3 forward_;
             vec3 right_;
 
-            double fov_;
+            float fov_;
 
             void recalculateVectors();
 
