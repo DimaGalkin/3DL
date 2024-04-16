@@ -28,7 +28,7 @@ namespace ThreeDL {
 
     class AmbientLight : public Light {
         public:
-            AmbientLight(std::string name, uint32_t color, float intensity);
+            AmbientLight(const std::string& name, uint32_t color, float intensity);
             AmbientLight() = delete;
 
             ~AmbientLight() = default;
@@ -36,7 +36,7 @@ namespace ThreeDL {
 
     class PointLight : public Light {
         public:
-            PointLight(std::string name, const vec3& position, uint32_t color, const float intensity);
+            PointLight(const std::string& name, const vec3& position, uint32_t color, const float intensity);
             PointLight() = delete;
 
             ~PointLight() = default;
