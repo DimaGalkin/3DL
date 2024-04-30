@@ -22,6 +22,11 @@ ThreeDL::OpenCLUtils::OpenCLUtils() {
         throw std::runtime_error("SVM not supported on this device");
     }
 
+    // get mem size in GB
+    cl_ulong mem_size;
+    device_.getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &mem_size);
+    std::cout << "Global memory size: " << mem_size / (1024 * 1024 * 1024) << " GB" << std::endl;
+
     context_ = cl::Context({device_});
     queue_ = cl::CommandQueue(context_, device_);
 }

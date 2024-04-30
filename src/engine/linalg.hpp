@@ -2,6 +2,9 @@
 
 #include <cmath>
 
+#ifndef float3
+typedef struct Vector3 float3;
+#endif
 #include "GPU/types.h"
 
 namespace ThreeDL {
@@ -16,41 +19,41 @@ namespace ThreeDL {
 
     class Vec3 {
         public:
-            Vec3(double other_x, double other_y, double other_z);
+            Vec3(float other_x, float other_y, float other_z);
             Vec3(const Vec3& other);
             Vec3();
 
-            double x;
-            double y;
-            double z;
+            float x;
+            float y;
+            float z;
 
             ROTATEORDER order_;
 
             Vector3 asGPUType() const;
 
-            void rotateX(const double angle);
-            void rotateY(const double angle);
-            void rotateZ(const double angle);
-            void rotate(const double x, const double y, const double z);
+            void rotateX(const float angle);
+            void rotateY(const float angle);
+            void rotateZ(const float angle);
+            void rotate(const float x, const float y, const float z);
 
             void normalize();
             Vec3 normalized() const;
 
             Vec3 cross(const Vec3& other) const;
-            double dot(const Vec3& other) const;
-            double distance(const Vec3& other) const;
+            float dot(const Vec3& other) const;
+            float distance(const Vec3& other) const;
 
             bool operator==(const Vec3& other) const;
             bool operator!=(const Vec3& other) const;
 
             Vec3 operator+(const Vec3& other) const;
             Vec3 operator-(const Vec3& other) const;
-            Vec3 operator*(const double other) const;
+            Vec3 operator*(const float other) const;
             Vec3 operator/(const Vec3& other) const;
 
             void operator+=(const Vec3& other);
             void operator-=(const Vec3& other);
-            void operator*=(const double other);
+            void operator*=(const float other);
             void operator/=(const Vec3& other);
 
             ~Vec3() = default;
@@ -58,16 +61,16 @@ namespace ThreeDL {
 
     class Vec2 {
         public:
-            Vec2(double other_x, double other_y);
+            Vec2(float other_x, float other_y);
             Vec2(const Vec2& other);
             Vec2();
 
-            double x;
-            double y;
+            float x;
+            float y;
 
             Vector2 asGPUType() const;
 
-            void rotate(const double angle);
+            void rotate(const float angle);
 
             void normalize();
             Vec2 normalized() const;
@@ -77,12 +80,12 @@ namespace ThreeDL {
 
             Vec2 operator+(const Vec2& other) const;
             Vec2 operator-(const Vec2& other) const;
-            Vec2 operator*(const double other) const;
+            Vec2 operator*(const float other) const;
             Vec2 operator/(const Vec2& other) const;
 
             void operator+=(const Vec2& other);
             void operator-=(const Vec2& other);
-            void operator*=(const double other);
+            void operator*=(const float other);
             void operator/=(const Vec2& other);
 
             ~Vec2() = default;

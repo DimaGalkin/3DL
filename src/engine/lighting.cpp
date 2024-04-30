@@ -18,22 +18,39 @@ GPULight ThreeDL::Light::asGPUType() const {
         .intensity_ = intensity_
     };
 
+    light.shadows_enabled_ = shadows_enabled_;
+    light.shadow_map_width_ = shadowmap_w_;
+    light.shadow_map_height_ = shadowmap_h_;
+    light.fov_ = fov_;
+
     return light;
 }
 
-ThreeDL::AmbientLight::AmbientLight(std::string name, uint32_t color, float intensity) {
+ThreeDL::AmbientLight::AmbientLight(const std::string& name, uint32_t color, float intensity) {
     name_ = name;
     type_ = LightType::AMBIENT;
     intensity_ = intensity;
     Utils::uintToLinear(color, color_);
 }
 
-ThreeDL::PointLight::PointLight(std::string name, const vec3& position, uint32_t color, const float intensity) {
+ThreeDL::PointLight::PointLight(const std::string& name, const vec3& position, uint32_t color, const float intensity) {
     name_ = name;
     type_ = LightType::POINT;
     position_ = position;
     intensity_ = intensity;
     model_ =  Object("../src/light.obj", FILEFORMAT::OBJ, color);
+
+    Utils::uintToLinear(color, color_);
+}
+
+ThreeDL::DirectionalLight::DirectionalLight(const std::string& name, const vec3& direction, const vec3& position, const float fov, uint32_t color, const float intensity) {
+    name_ = name;
+    type_ = LightType::DIRECTIONAL;
+    direction_ = direction;
+    position_ = position;
+    intensity_ = intensity;
+    fov_ = fov;
+    model_ = Object("../src/light.obj", FILEFORMAT::OBJ, color);
 
     Utils::uintToLinear(color, color_);
 }

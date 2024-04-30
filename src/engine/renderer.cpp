@@ -166,6 +166,7 @@ void ThreeDL::Renderer::renderGUIWindows(uint64_t fps) {
             ImGui::SliderFloat("Intensity", &selected_light_->intensity_, 0, 1);
         } else {
             ImGui::SliderFloat("Intensity", &selected_light_->intensity_, 0, 100000);
+            ImGui::SliderFloat("FOV", &selected_light_->fov_, 0, 180);
         }
         ImGui::Text("\n");
 
@@ -272,11 +273,21 @@ void ThreeDL::Renderer::render() {
         "gpu_lighting",
         "src/engine/GPU/kernel.cl"
     );
+    cl::Program shadow_program = ocl_utils_.buildProgram(
+        "gpu_shadow",
+        "src/engine/GPU/kernel.cl"
+    );
+    cl::Program fragment_program = ocl_utils_.buildProgram(
+        "gpu_fragment",
+        "src/engine/GPU/kernel.cl"
+    );
 
     std::cout << "Kernel Compilation Complete!" << std::endl;
 
     gpu_render_program gpu_render (cl::Kernel(render_program, "gpu_render"));
     gpu_lighting_program gpu_lighting (cl::Kernel(lighting_program, "gpu_lighting"));
+    gpu_shadow_program gpu_shadow (cl::Kernel(shadow_program, "gpu_shadow"));
+    gpu_fragment_program gpu_fragment (cl::Kernel(fragment_program, "gpu_fragment"));
 
     while (!client_quit_) {
         bool show_gui = gui_enabled_;
@@ -296,7 +307,7 @@ void ThreeDL::Renderer::render() {
         zbuffer_buffer_ = cl::Buffer(
                 ocl_utils_.context_,
                 CL_MEM_READ_WRITE,
-                sizeof(double) * width_ * height_
+                sizeof(float) * width_ * height_
         );
 
         lights_buffer_ = cl::Buffer(
@@ -308,13 +319,13 @@ void ThreeDL::Renderer::render() {
         normal_buffer_ = cl::Buffer(
                 ocl_utils_.context_,
                 CL_MEM_READ_WRITE,
-                sizeof(Vector3) * width_ * height_
+                sizeof(float3) * width_ * height_
         );
 
         position_buffer_ = cl::Buffer(
                 ocl_utils_.context_,
                 CL_MEM_READ_WRITE,
-                sizeof(Vector3) * width_ * height_
+                sizeof(float3) * width_ * height_
         );
 
         diffuse_buffer_ = cl::Buffer(
@@ -327,6 +338,24 @@ void ThreeDL::Renderer::render() {
                 ocl_utils_.context_,
                 CL_MEM_READ_WRITE,
                 sizeof(uint32_t) * width_ * height_
+        );
+
+        color_buffer_ = cl::Buffer(
+                ocl_utils_.context_,
+                CL_MEM_READ_WRITE,
+                sizeof(uint32_t) * width_ * height_
+        );
+
+        tri_store_buffer_ = cl::Buffer(
+                ocl_utils_.context_,
+                CL_MEM_READ_WRITE,
+                sizeof(TriangleStore) * width_ * height_
+        );
+
+        t_buffer_ = cl::Buffer(
+                ocl_utils_.context_,
+                CL_MEM_READ_WRITE,
+                sizeof(struct Vector3) * width_ * height_
         );
 
         for (const auto& light : lights_) {
@@ -345,7 +374,7 @@ void ThreeDL::Renderer::render() {
                 zbuffer_buffer_,
                 CL_TRUE,
                 0,
-                sizeof(double) * width_ * height_,
+                sizeof(float) * width_ * height_,
                 zbuffer_.data()
         );
 
@@ -368,7 +397,7 @@ void ThreeDL::Renderer::render() {
         }
 
         for (const auto& light : lights_) {
-            if (light->type_ != LightType::POINT || !light->model_enabled_) continue;
+            if ((light->type_ != LightType::POINT && light->type_ != LightType::DIRECTIONAL) || !light->model_enabled_) continue;
 
             render_mutex_.lock();
 
@@ -384,19 +413,86 @@ void ThreeDL::Renderer::render() {
             renderObject(model, gpu_render);
         }
 
-        cl::NDRange global {width_ * height_};
-
-        gpu_lighting (
-            cl::EnqueueArgs(ocl_utils_.queue_, global),
-            pixels_buffer_,
-            lights_buffer_,
-            state_buffer_,
-            diffuse_buffer_,
-            specular_buffer_,
+        gpu_fragment(
+            cl::EnqueueArgs(ocl_utils_.queue_, cl::NDRange(width_ * height_)),
+            tri_store_buffer_,
+            t_buffer_,
+            texture_buffer_,
+            color_buffer_,
             normal_buffer_,
             position_buffer_,
-            zbuffer_buffer_
-        ).wait();
+            diffuse_buffer_,
+            specular_buffer_,
+            state_buffer_
+        );
+
+        cl::NDRange global {width_ * height_};
+
+        bool first = true;
+        cl::Buffer shadow_map;
+
+        for (auto& light : gpu_lights_) {
+            cl::Buffer light_buffer = cl::Buffer(
+                    ocl_utils_.context_,
+                    CL_MEM_READ_WRITE,
+                    sizeof(GPULight)
+            );
+
+            ocl_utils_.queue_.enqueueWriteBuffer(
+                    light_buffer,
+                    CL_TRUE,
+                    0,
+                    sizeof(GPULight),
+                    &light
+            );
+
+            if (light.type_ == LightType::DIRECTIONAL) {
+
+                light.shadow_map_width_ = 1024;
+                light.shadow_map_height_ = 1024;
+
+                shadow_map = cl::Buffer(
+                        ocl_utils_.context_,
+                        CL_MEM_READ_WRITE,
+                        sizeof(uint32_t) * light.shadow_map_width_ * light.shadow_map_height_
+                );
+
+                for (const auto &object: render_queue_) {
+                    cl::NDRange dims {object->triangles_.size()};
+
+                    ocl_utils_.queue_.enqueueWriteBuffer(
+                            triangles_buffer_,
+                            CL_TRUE,
+                            0,
+                            sizeof(Triangle) * object->triangles_.size(),
+                            object->triangles_.data()
+                    );
+
+//                    gpu_shadow(
+//                            cl::EnqueueArgs(ocl_utils_.queue_, dims),
+//                            triangles_buffer_,
+//                            shadow_map,
+//                            light_buffer,
+//                            state_buffer_,
+//                            zbuffer_buffer_
+//                    ).wait();
+                }
+            }
+
+            gpu_lighting(
+                    cl::EnqueueArgs(ocl_utils_.queue_, global),
+                    pixels_buffer_,
+                    shadow_map,
+                    color_buffer_,
+                    light_buffer,
+                    state_buffer_,
+                    diffuse_buffer_,
+                    specular_buffer_,
+                    normal_buffer_,
+                    position_buffer_,
+                    zbuffer_buffer_
+            ).wait();
+        }
 
         gpu_lights_.clear();
 
@@ -479,6 +575,8 @@ void ThreeDL::Renderer::renderObject(const ThreeDL::Object& object, gpu_render_p
     gpu_render (
         cl::EnqueueArgs(ocl_utils_.queue_, global),
         triangles_buffer_,
+        tri_store_buffer_,
+        t_buffer_,
         lights_buffer_,
         state_buffer_,
         zbuffer_buffer_,
@@ -487,6 +585,7 @@ void ThreeDL::Renderer::renderObject(const ThreeDL::Object& object, gpu_render_p
         position_buffer_,
         diffuse_buffer_,
         specular_buffer_,
+        color_buffer_,
         pixels_buffer_
     ).wait();
 }

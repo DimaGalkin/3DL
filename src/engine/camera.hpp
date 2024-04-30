@@ -14,7 +14,7 @@ namespace ThreeDL {
     class Camera {
         public:
             Camera(const vec3& position, const vec3& rotation);
-            Camera(const vec3& position, const vec3& rotation, const double fov);
+            Camera(const vec3& position, const vec3& rotation, const float fov);
             Camera() = delete;
 
             vec3 position_;
@@ -26,13 +26,13 @@ namespace ThreeDL {
 
             void recalculateVectors();
 
-            void moveForward(const double delta);
-            void moveRight(const double delta);
+            void moveForward(const float delta);
+            void moveRight(const float delta);
 
             void rotate(const vec3 &delta);
-            void tilt(const double delta);
-            void pan(const double delta);
-            void roll(const double delta);
+            void tilt(const float delta);
+            void pan(const float delta);
+            void roll(const float delta);
 
             ~Camera() = default;
 

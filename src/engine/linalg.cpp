@@ -1,7 +1,7 @@
 #include <stdexcept>
 #include "linalg.hpp"
 
-ThreeDL::Vec3::Vec3(double other_x, double other_y, double other_z)
+ThreeDL::Vec3::Vec3(float other_x, float other_y, float other_z)
     : x(other_x),
       y(other_y),
       z(other_z),
@@ -26,28 +26,28 @@ Vector3 ThreeDL::Vec3::asGPUType() const {
     return Vector3 {x, y, z};
 }
 
-void ThreeDL::Vec3::rotateX(const double angle) {
-    double radians = angle * M_PI / 180;
-    double temp_y = y;
+void ThreeDL::Vec3::rotateX(const float angle) {
+    float radians = angle * M_PI / 180;
+    float temp_y = y;
     y = y * cos(radians) - z * sin(radians);
     z = temp_y * sin(radians) + z * cos(radians);
 }
 
-void ThreeDL::Vec3::rotateY(const double angle) {
-    double radians = angle * M_PI / 180;
-    double temp_x = x;
+void ThreeDL::Vec3::rotateY(const float angle) {
+    float radians = angle * M_PI / 180;
+    float temp_x = x;
     x = x * cos(radians) + z * sin(radians);
     z = -temp_x * sin(radians) + z * cos(radians);
 }
 
-void ThreeDL::Vec3::rotateZ(const double angle) {
-    double radians = angle * M_PI / 180;
-    double temp_x = x;
+void ThreeDL::Vec3::rotateZ(const float angle) {
+    float radians = angle * M_PI / 180;
+    float temp_x = x;
     x = x * cos(radians) - y * sin(radians);
     y = temp_x * sin(radians) + y * cos(radians);
 }
 
-void ThreeDL::Vec3::rotate(const double x, const double y, const double z) {
+void ThreeDL::Vec3::rotate(const float x, const float y, const float z) {
     switch (order_) {
         case ROTATEORDER::XYZ:
             rotateX(x);
@@ -91,14 +91,14 @@ void ThreeDL::Vec3::rotate(const double x, const double y, const double z) {
 }
 
 void ThreeDL::Vec3::normalize() {
-    double length = sqrt(x * x + y * y + z * z);
+    float length = sqrt(x * x + y * y + z * z);
     x /= length;
     y /= length;
     z /= length;
 }
 
 ThreeDL::Vec3 ThreeDL::Vec3::normalized() const {
-    double length = sqrt(x * x + y * y + z * z);
+    float length = sqrt(x * x + y * y + z * z);
     return Vec3 {x / length, y / length, z / length};
 }
 
@@ -110,11 +110,11 @@ ThreeDL::Vec3 ThreeDL::Vec3::cross(const Vec3& other) const {
     };
 }
 
-double ThreeDL::Vec3::dot(const Vec3& other) const {
+float ThreeDL::Vec3::dot(const Vec3& other) const {
     return x * other.x + y * other.y + z * other.z;
 }
 
-double ThreeDL::Vec3::distance(const Vec3& other) const {
+float ThreeDL::Vec3::distance(const Vec3& other) const {
     return sqrt(pow(x - other.x, 2) + pow(y - other.y, 2) + pow(z - other.z, 2));
 }
 
@@ -134,7 +134,7 @@ ThreeDL::Vec3 ThreeDL::Vec3::operator-(const Vec3& other) const {
     return Vec3 {x - other.x, y - other.y, z - other.z};
 }
 
-ThreeDL::Vec3 ThreeDL::Vec3::operator*(const double other) const {
+ThreeDL::Vec3 ThreeDL::Vec3::operator*(const float other) const {
     return Vec3 {x * other, y * other, z * other};
 }
 
@@ -154,7 +154,7 @@ void ThreeDL::Vec3::operator-=(const Vec3& other) {
     z -= other.z;
 }
 
-void ThreeDL::Vec3::operator*=(const double other) {
+void ThreeDL::Vec3::operator*=(const float other) {
     x *= other;
     y *= other;
     z *= other;
@@ -166,7 +166,7 @@ void ThreeDL::Vec3::operator/=(const Vec3& other) {
     z /= other.z;
 }
 
-ThreeDL::Vec2::Vec2(double other_x, double other_y)
+ThreeDL::Vec2::Vec2(float other_x, float other_y)
     : x(other_x),
       y(other_y)
 {}
@@ -185,20 +185,20 @@ Vector2 ThreeDL::Vec2::asGPUType() const {
     return Vector2 {x, y};
 }
 
-void ThreeDL::Vec2::rotate(const double angle) {
-    double temp_x = x;
+void ThreeDL::Vec2::rotate(const float angle) {
+    float temp_x = x;
     x = x * cos(angle) - y * sin(angle);
     y = temp_x * sin(angle) + y * cos(angle);
 }
 
 void ThreeDL::Vec2::normalize() {
-    double length = sqrt(x * x + y * y);
+    float length = sqrt(x * x + y * y);
     x /= length;
     y /= length;
 }
 
 ThreeDL::Vec2 ThreeDL::Vec2::normalized() const {
-    double length = sqrt(x * x + y * y);
+    float length = sqrt(x * x + y * y);
     return Vec2 {x / length, y / length};
 }
 
@@ -218,7 +218,7 @@ ThreeDL::Vec2 ThreeDL::Vec2::operator-(const Vec2& other) const {
     return Vec2 {x - other.x, y - other.y};
 }
 
-ThreeDL::Vec2 ThreeDL::Vec2::operator*(const double other) const {
+ThreeDL::Vec2 ThreeDL::Vec2::operator*(const float other) const {
     return Vec2 {x * other, y * other};
 }
 
@@ -236,7 +236,7 @@ void ThreeDL::Vec2::operator-=(const Vec2& other) {
     y -= other.y;
 }
 
-void ThreeDL::Vec2::operator*=(const double other) {
+void ThreeDL::Vec2::operator*=(const float other) {
     x *= other;
     y *= other;
 }

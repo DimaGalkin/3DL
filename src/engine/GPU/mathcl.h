@@ -24,7 +24,7 @@ void Vec3Add(
 
 void Vec3Multiply(
     const struct Vector3* v1,
-    const double v2,
+    const float v2,
     struct Vector3* out
 ) {
     out->x = v1->x * v2;
@@ -42,18 +42,25 @@ void Vec3MultiplyVec3(
     out->z = v1->z * v2->z;
 }
 
+void powf(
+    float* a,
+    float b
+) {
+    *a = pow(*a, b);
+}
+
 void Vec3GammaCorrect(
     struct Vector3* v,
     struct Vector3* out
 ) {
-    out->x = pow(v->x, 1.0 / 2.2);
-    out->y = pow(v->y, 1.0 / 2.2);
-    out->z = pow(v->z, 1.0 / 2.2);
+    out->x = v->x;
+    out->y = v->y;
+    out->z = v->z;
 }
 
 void Vec3Divide(
     const struct Vector3* v1,
-    const double v2,
+    const float v2,
     struct Vector3* out
 ) {
     out->x = v1->x / v2;
@@ -61,7 +68,7 @@ void Vec3Divide(
     out->z = v1->z / v2;
 }
 
-double Vec3Dot(
+float Vec3Dot(
     const struct Vector3* v1,
     const struct Vector3* v2
 ) {
@@ -70,11 +77,11 @@ double Vec3Dot(
 
 void Vec3RotateX(
     const struct Vector3* v1,
-    const double angle,
+    const float angle,
     struct Vector3* out
 ) {
-    double c = cos(angle);
-    double s = sin(angle);
+    float c = cos(angle);
+    float s = sin(angle);
     out->x = v1->x;
     out->y = v1->y * c - v1->z * s;
     out->z = v1->y * s + v1->z * c;
@@ -82,11 +89,11 @@ void Vec3RotateX(
 
 void Vec3RotateY(
     const struct Vector3* v1,
-    const double angle,
+    const float angle,
     struct Vector3* out
 ) {
-    double c = cos(angle);
-    double s = sin(angle);
+    float c = cos(angle);
+    float s = sin(angle);
     out->x = v1->x * c + v1->z * s;
     out->y = v1->y;
     out->z = -v1->x * s + v1->z * c;
@@ -94,11 +101,11 @@ void Vec3RotateY(
 
 void Vec3RotateZ(
     const struct Vector3* v1,
-    const double angle,
+    const float angle,
     struct Vector3* out
 ) {
-    double c = cos(angle);
-    double s = sin(angle);
+    float c = cos(angle);
+    float s = sin(angle);
     out->x = v1->x * c - v1->y * s;
     out->y = v1->x * s + v1->y * c;
     out->z = v1->z;
@@ -108,24 +115,24 @@ void Vec3Rotate(
     struct Vector3* a,
     struct Vector3* rotation
 ) {
-    double x = a->x;
-    double y = a->y;
-    double z = a->z;
+    float x = a->x;
+    float y = a->y;
+    float z = a->z;
 
-    double sinX = sin(rotation->x * (M_PI / 180.0));
-    double cosX = cos(rotation->x * (M_PI / 180.0));
-    double sinY = sin(rotation->y * (M_PI / 180.0));
-    double cosY = cos(rotation->y * (M_PI / 180.0));
-    double sinZ = sin(rotation->z * (M_PI / 180.0));
-    double cosZ = cos(rotation->z * (M_PI / 180.0));
+    float sinX = sin(rotation->x * (M_PI / 180.0));
+    float cosX = cos(rotation->x * (M_PI / 180.0));
+    float sinY = sin(rotation->y * (M_PI / 180.0));
+    float cosY = cos(rotation->y * (M_PI / 180.0));
+    float sinZ = sin(rotation->z * (M_PI / 180.0));
+    float cosZ = cos(rotation->z * (M_PI / 180.0));
 
-    double x1 = x * cosY + z * sinY;
-    double y1 = x * sinX * sinY + y * cosX - z * sinX * cosY;
-    double z1 = -x * cosX * sinY + y * sinX + z * cosX * cosY;
+    float x1 = x * cosY + z * sinY;
+    float y1 = x * sinX * sinY + y * cosX - z * sinX * cosY;
+    float z1 = -x * cosX * sinY + y * sinX + z * cosX * cosY;
 
-    double x2 = x1 * cosZ - y1 * sinZ;
-    double y2 = x1 * sinZ + y1 * cosZ;
-    double z2 = z1;
+    float x2 = x1 * cosZ - y1 * sinZ;
+    float y2 = x1 * sinZ + y1 * cosZ;
+    float z2 = z1;
 
     a->x = x2;
     a->y = y2;
@@ -154,7 +161,7 @@ void Vec2Add(
 
 void Vec2Multiply(
     const struct Vector2* v1,
-    const double v2,
+    const float v2,
     struct Vector2* out
 ) {
     out->x = v1->x * v2;
@@ -164,14 +171,14 @@ void Vec2Multiply(
 
 void Vec2Divide(
     const struct Vector2* v1,
-    const double v2,
+    const float v2,
     struct Vector2* out
 ) {
     out->x = v1->x / v2;
     out->y = v1->y / v2;
 }
 
-double Vec2Dot(
+float Vec2Dot(
     const struct Vector2* v1,
     const struct Vector2* v2
 ) {
@@ -180,11 +187,11 @@ double Vec2Dot(
 
 void Vec2Rotate(
     const struct Vector2* v1,
-    const double angle,
+    const float angle,
     struct Vector2* out
 ) {
-    double c = cos(angle);
-    double s = sin(angle);
+    float c = cos(angle);
+    float s = sin(angle);
     out->x = v1->x * c - v1->y * s;
     out->y = v1->x * s + v1->y * c;
 }
@@ -199,7 +206,7 @@ void Vec3Cross(
     out->z = v1->x * v2->y - v1->y * v2->x;
 }
 
-double Vec3Length(
+float Vec3Length(
     const struct Vector3* v
 ) {
     return sqrt(v->x * v->x + v->y * v->y + v->z * v->z);
@@ -209,7 +216,7 @@ void normalize(
     struct Vector3* v,
     struct Vector3* out
 ) {
-    double length = sqrt(v->x * v->x + v->y * v->y + v->z * v->z);
+    float length = sqrt(v->x * v->x + v->y * v->y + v->z * v->z);
     out->x = v->x / length;
     out->y = v->y / length;
     out->z = v->z / length;
@@ -227,15 +234,15 @@ void copyUvs(
 void calcUv(
     const struct Vector2* uv1,
     const struct Vector2* uv2,
-    double t,
+    float t,
     struct Vector2* out
 ) {
     out->x = uv1->x + (uv2->x - uv1->x) * t;
     out->y = uv1->y + (uv2->y - uv1->y) * t;
 }
 
-double absd(
-    double a
+float absd(
+    float a
 ) {
     return a < 0 ? -a : a;
 }
@@ -245,8 +252,8 @@ void intersects(
     struct Ray* ray,
     struct IntersectInfo* out
 ) {
-    double n = Vec3Dot(&plane->normal_, &plane->position_) - Vec3Dot(&plane->normal_, &ray->origin_);
-    double d = Vec3Dot(&plane->normal_, &ray->direction_);
+    float n = Vec3Dot(&plane->normal_, &plane->position_) - Vec3Dot(&plane->normal_, &ray->origin_);
+    float d = Vec3Dot(&plane->normal_, &ray->direction_);
 
     if (absd(d) < 0.0001) {
         out->intersect_.x = 0;
@@ -256,7 +263,7 @@ void intersects(
         return;
     }
 
-    double t = n / d;
+    float t = n / d;
     struct Vector3 position = ray->direction_;
 
     Vec3Multiply(
@@ -297,7 +304,7 @@ void intersects(
 void interpolate(
     struct Vector2* start,
     struct Vector2* dir,
-    double t,
+    float t,
     struct Vector2* out
 ) {
     out->x = start->x + dir->x * t;
@@ -305,15 +312,37 @@ void interpolate(
     out->texture_info_ = start->texture_info_ + dir->texture_info_ * t;
 }
 
+void interpolateAB(
+    struct Vector2 a,
+    struct Vector2 b,
+    float t,
+    struct Vector2* out
+) {
+    struct Vector2 dir = b;
+    Vec2Subtract(&b, &a, &dir);
+    interpolate(&a, &dir, t, out);
+}
+
 void interpolateVec3(
     struct Vector3* start,
     struct Vector3* dir,
-    double t,
+    float t,
     struct Vector3* out
 ) {
     out->x = start->x + dir->x * t;
     out->y = start->y + dir->y * t;
     out->z = start->z + dir->z * t;
+}
+
+void interpolateVec3AB(
+    struct Vector3 a,
+    struct Vector3 b,
+    float t,
+    struct Vector3* out
+) {
+    struct Vector3 dir = b;
+    Vec3Subtract(&b, &a, &dir);
+    interpolateVec3(&a, &dir, t, out);
 }
 
 bool isInside(
@@ -332,7 +361,7 @@ bool isInside(
     return Vec3Dot(
         plane_normal,
         &vert2
-    ) >= 0;
+    ) > 0;
 }
 
 void copyColours(
@@ -350,4 +379,11 @@ void copyNormals(
     v2->n1 = v1->n1;
     v2->n2 = v1->n2;
     v2->n3 = v1->n3;
+}
+
+float maxf(
+    float a,
+    float b
+) {
+    return a > b ? a : b;
 }

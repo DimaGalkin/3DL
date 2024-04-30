@@ -19,7 +19,7 @@ uint32_t ThreeDL::Utils::samplePixel(const SDL_Surface *surface, const uint32_t 
     return *reinterpret_cast<uint32_t*>(p);
 }
 
-uint32_t ThreeDL::Utils::linearToUint(const double r, const double g, const double b) {
+uint32_t ThreeDL::Utils::linearToUint(const float r, const float g, const float b) {
     return (static_cast<uint8_t>(r * 255) << 16) | (static_cast<uint8_t>(g * 255) << 8) | static_cast<uint8_t>(b * 255);
 }
 

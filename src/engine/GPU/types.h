@@ -8,7 +8,8 @@ typedef unsigned int uint32_t;
 enum LightType {
     UNINITIALIZED,
     AMBIENT,
-    POINT
+    POINT,
+    DIRECTIONAL
 };
 
 enum RENDERMODE {
@@ -18,17 +19,18 @@ enum RENDERMODE {
 };
 
 struct Vector2 {
-    double x;
-    double y;
+    float x;
+    float y;
 
-    double depth_info_;
-    double texture_info_;
+    float depth_info_;
+    float texture_info_;
 };
 
 struct Vector3 {
-    double x;
-    double y;
-    double z;
+    float x;
+    float y;
+    float z;
+    float w;
 };
 
 struct State {
@@ -36,7 +38,7 @@ struct State {
 
     struct Vector3 camera_position_;
     struct Vector3 camera_rotation_;
-    double fov_;
+    float fov_;
 
     struct Vector3 model_position_;
 
@@ -46,6 +48,29 @@ struct State {
     uint32_t texture_height_;
 
     uint32_t num_lights_;
+};
+
+struct TriangleStore {
+    struct Vector2 v1;
+    struct Vector2 v2;
+    struct Vector2 v3;
+
+    uint32_t texture_;
+
+    struct Vector3 n1;
+    struct Vector3 n2;
+    struct Vector3 n3;
+
+    struct Vector3 v1_;
+    struct Vector3 v2_;
+    struct Vector3 v3_;
+
+    uint32_t diffuse_color_;
+    uint32_t specular_color_;
+
+    bool valid_;
+    bool top_;
+    bool swap_;
 };
 
 struct Triangle {
@@ -63,7 +88,8 @@ struct Triangle {
 
     uint32_t diffuse_color_;
     uint32_t specular_color_;
-    double shininess_;
+
+    float shininess_;
 };
 
 struct ScreenTriangle {
@@ -79,7 +105,7 @@ struct ScreenTriangle {
 struct IntersectInfo {
     struct Vector3 intersect_;
     bool valid_;
-    double t_;
+    float t_;
 };
 
 struct Ray {
@@ -104,9 +130,17 @@ struct GPULight {
     struct Vector3 position_;
     struct Vector3 direction_;
 
+    bool shadows_enabled_;
+    uint32_t shadow_map_width_;
+    uint32_t shadow_map_height_;
+
+    float fov_;
+
     uint32_t color_;
 
-    double intensity_;
+    bool first_;
+
+    float intensity_;
 };
 
 #endif

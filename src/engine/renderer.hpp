@@ -14,6 +14,10 @@
 #include <thread>
 #include <vector>
 
+#ifndef float3
+typedef struct Vector3 float3;
+#endif
+
 #include "camera.hpp"
 #include "GPU/types.h"
 #include "objects.hpp"
@@ -24,11 +28,19 @@ namespace ThreeDL {
     // TODO: Add comment with all the names of parameters in order
     using gpu_render_program = cl::compatibility::make_kernel<
             cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer,
-            cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer
+            cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer,
+            cl::Buffer, cl::Buffer, cl::Buffer
     >;
     using gpu_lighting_program = cl::compatibility::make_kernel<
             cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer,
-            cl::Buffer, cl::Buffer, cl::Buffer
+            cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer
+    >;
+    using gpu_shadow_program = cl::compatibility::make_kernel<
+            cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer
+    >;
+    using gpu_fragment_program = cl::compatibility::make_kernel<
+            cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer,
+            cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer
     >;
 
     /**
@@ -96,7 +108,7 @@ namespace ThreeDL {
 
             Light* selected_light_ = nullptr;
 
-            std::vector<double> zbuffer_;
+            std::vector<float> zbuffer_;
             std::vector<const Object*> render_queue_;
 
             std::vector<GPULight> gpu_lights_;
@@ -105,6 +117,8 @@ namespace ThreeDL {
             OpenCLUtils ocl_utils_;
 
             cl::Buffer zbuffer_buffer_;
+            cl::Buffer t_buffer_;
+            cl::Buffer tri_store_buffer_;
             cl::Buffer pixels_buffer_;
             cl::Buffer state_buffer_;
             cl::Buffer triangles_buffer_;
@@ -114,6 +128,7 @@ namespace ThreeDL {
             cl::Buffer position_buffer_;
             cl::Buffer diffuse_buffer_;
             cl::Buffer specular_buffer_;
+            cl::Buffer color_buffer_;
 
             void init();
             void renderGUIWindows(uint64_t fps);

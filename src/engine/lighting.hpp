@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef float3
+typedef struct Vector3 float3;
+#endif
 #include "GPU/types.h"
 #include "linalg.hpp"
 #include "objects.hpp"
@@ -22,6 +25,10 @@ namespace ThreeDL {
             vec3 direction_;
             float intensity_;
             float color_[3];
+            float fov_;
+            bool shadows_enabled_ = true;
+            uint32_t shadowmap_w_ = 1024;
+            uint32_t shadowmap_h_ = 1024;
 
             ~Light() = default;
     };
@@ -40,5 +47,13 @@ namespace ThreeDL {
             PointLight() = delete;
 
             ~PointLight() = default;
+    };
+
+    class DirectionalLight : public Light {
+        public:
+            DirectionalLight(const std::string& name, const vec3& direction, const vec3& position, const float fov, uint32_t color, const float intensity);
+            DirectionalLight() = delete;
+
+            ~DirectionalLight() = default;
     };
 };

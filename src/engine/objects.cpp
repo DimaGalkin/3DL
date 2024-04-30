@@ -65,9 +65,9 @@ void ThreeDL::Object::fillTextureBuffer(const uint32_t color) {
 }
 
 void ThreeDL::Object::findCentre() {
-    double avg_x = 0;
-    double avg_y = 0;
-    double avg_z = 0;
+    float avg_x = 0;
+    float avg_y = 0;
+    float avg_z = 0;
     uint64_t total = 0;
 
     for (const auto& triangle : triangles_) {
@@ -149,7 +149,8 @@ std::vector<Triangle> ThreeDL::OBJLoader::load(const std::string& path) {
                 Vector3 {
                     std::stod(tokens[0]),
                     std::stod(tokens[1]),
-                    std::stod(tokens[2])
+                    std::stod(tokens[2]),
+                    0
                 }
             );
 
@@ -162,7 +163,8 @@ std::vector<Triangle> ThreeDL::OBJLoader::load(const std::string& path) {
                 Vector3 {
                     std::stod(tokens[0]),
                     std::stod(tokens[1]),
-                    std::stod(tokens[2])
+                    std::stod(tokens[2]),
+                    0
                 }
             );
 

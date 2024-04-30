@@ -13,6 +13,9 @@
 #include <algorithm>
 #include <vector>
 
+#ifndef float3
+typedef struct Vector3 float3;
+#endif
 #include "GPU/types.h"
 #include "linalg.hpp"
 
