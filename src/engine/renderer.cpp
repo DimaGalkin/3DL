@@ -6,20 +6,26 @@ ThreeDL::Renderer::Renderer(
         const uint32_t height
 ) : width_(width),
     height_(height),
-    camera_(camera)
+    camera_(camera),
+    controller_(nullptr)
 {
     init();
 }
 
 ThreeDL::Renderer::Renderer(
-        const ThreeDL::CameraController& controller,
+        ThreeDL::CameraController& controller,
         const uint32_t width,
         const uint32_t height
 ) : width_(width),
     height_(height),
-    camera_(controller.getCamera())
+    camera_(controller.getCamera()),
+    controller_(&controller),
+    camera_controller_(true)
 {
     init();
+    SDL_SetRelativeMouseMode(SDL_FALSE);
+    controller_->screen_centre_x_ = width_/2;
+    controller_->screen_centre_y_ = height_/2;
 }
 
 void ThreeDL::Renderer::init() {
@@ -212,6 +218,9 @@ void ThreeDL::Renderer::begin() {
         if (event.type == SDL_KEYDOWN) {
             if (event.key.keysym.sym == SDLK_F12 && SDL_GetTicks64() - enabled_ticks_ > 10) {
                  gui_enabled_ = !gui_enabled_;
+                 controller_->rotation_enabled_ = !controller_->rotation_enabled_;
+                 SDL_SetRelativeMouseMode(!gui_enabled_ ? SDL_TRUE : SDL_FALSE);
+                 SDL_WarpMouseInWindow(window_, width_/2, height_/2);
             } else {
                 enabled_ticks_ = SDL_GetTicks64();
             }
@@ -252,6 +261,12 @@ void ThreeDL::Renderer::begin() {
             render_mutex_.lock();
             animation(animation_ticks);
             render_mutex_.unlock();
+
+            if (!gui_enabled_ && camera_controller_) {
+                SDL_WarpMouseInWindow(window_, width_/2, height_/2);
+                controller_->mouse_prev_x_ = 0;
+                controller_->mouse_prev_y_ = 0;
+            }
         }
 
         ticks_at_last_anim = SDL_GetTicks64();
@@ -431,6 +446,9 @@ void ThreeDL::Renderer::render() {
         bool first = true;
         cl::Buffer shadow_map;
 
+        std::vector<float> shadow_map_cpu;
+        shadow_map_cpu.assign(512 * 512, -INFINITY);
+
         for (auto& light : gpu_lights_) {
             cl::Buffer light_buffer = cl::Buffer(
                     ocl_utils_.context_,
@@ -448,34 +466,48 @@ void ThreeDL::Renderer::render() {
 
             if (light.type_ == LightType::DIRECTIONAL) {
 
-                light.shadow_map_width_ = 1024;
-                light.shadow_map_height_ = 1024;
+                light.shadow_map_width_ = 512;
+                light.shadow_map_height_ = 512;
 
                 shadow_map = cl::Buffer(
                         ocl_utils_.context_,
                         CL_MEM_READ_WRITE,
-                        sizeof(uint32_t) * light.shadow_map_width_ * light.shadow_map_height_
+                        sizeof(float) * light.shadow_map_width_ * light.shadow_map_height_
+                );
+
+                ocl_utils_.queue_.enqueueWriteBuffer(
+                        shadow_map,
+                        CL_TRUE,
+                        0,
+                        sizeof(float) * light.shadow_map_width_ * light.shadow_map_height_,
+                        shadow_map_cpu.data()
                 );
 
                 for (const auto &object: render_queue_) {
                     cl::NDRange dims {object->triangles_.size()};
 
+                    cl::Buffer tris = cl::Buffer(
+                            ocl_utils_.context_,
+                            CL_MEM_READ_WRITE,
+                            sizeof(Triangle) * object->triangles_.size()
+                    );
+
                     ocl_utils_.queue_.enqueueWriteBuffer(
-                            triangles_buffer_,
+                            tris,
                             CL_TRUE,
                             0,
                             sizeof(Triangle) * object->triangles_.size(),
                             object->triangles_.data()
                     );
 
-//                    gpu_shadow(
-//                            cl::EnqueueArgs(ocl_utils_.queue_, dims),
-//                            triangles_buffer_,
-//                            shadow_map,
-//                            light_buffer,
-//                            state_buffer_,
-//                            zbuffer_buffer_
-//                    ).wait();
+                    gpu_shadow(
+                            cl::EnqueueArgs(ocl_utils_.queue_, dims),
+                            tris,
+                            shadow_map,
+                            light_buffer,
+                            state_buffer_,
+                            zbuffer_buffer_
+                    ).wait();
                 }
             }
 

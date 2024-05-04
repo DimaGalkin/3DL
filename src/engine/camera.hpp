@@ -46,6 +46,12 @@ namespace ThreeDL {
             CameraController(const vec3& position, const vec3& rotation, const float fov);
             CameraController() = delete;
 
+            int mouse_prev_x_;
+            int mouse_prev_y_;
+            int screen_centre_x_;
+            int screen_centre_y_;
+            bool rotation_enabled_ = false;
+
             void tick();
 
             void translate(const vec3& delta);
@@ -64,5 +70,8 @@ namespace ThreeDL {
             };
 
             keymap_t keymap_ = {};
+
+            int mouse_x_;
+            int mouse_y_;
     };
 };

@@ -10,10 +10,16 @@ ThreeDL::CameraController controller (
 ThreeDL::Renderer renderer (controller, 1920, 1080);
 
 ThreeDL::Object plane (
-        "../src/f18.obj",
+        "../src/f15.obj",
         ThreeDL::FILEFORMAT::OBJ,
-        "../src/f18.png"
+        "../src/f15.png"
 );
+
+ThreeDL::Object fl {
+    "../src/floor.obj",
+    ThreeDL::FILEFORMAT::OBJ,
+    0xffffff
+};
 
 ThreeDL::vec3 light_pos {plane.centre_.x, plane.centre_.y + 50, plane.centre_.z};
 
@@ -36,16 +42,16 @@ int tick = 0;
 void animation(uint64_t ticks) {
     controller.tick();
 
-//    ThreeDL::vec3 lp = ThreeDL::vec3 {
-//        10 * cos(tick / 1000.0),
-//        0,
-//        10 * sin(tick / 1000.0)
-//    };
-//
-//    ++tick;
-//
-//    point.position_ = light_pos + lp;
-//    point.model_.position_ = light_pos + lp;
+    ThreeDL::vec3 lp = ThreeDL::vec3 {
+        10 * (float)cos(tick / 1000.0),
+        0,
+        10 * (float)sin(tick / 1000.0)
+    };
+
+    ++tick;
+
+    point.position_ = light_pos + lp;
+    point.model_.position_ = light_pos + lp;
 }
 
 int main(const int argc, const char** argv) {
@@ -54,7 +60,6 @@ int main(const int argc, const char** argv) {
     renderer.add(&ambient);
     renderer.add(&point);
 
-    //renderer.add(&object);
     renderer.add(&plane);
     
     renderer.begin();

@@ -1,3 +1,4 @@
+#include <iostream>
 #include "camera.hpp"
 
 ThreeDL::Camera::Camera(const vec3& position, const vec3& rotation)
@@ -67,7 +68,22 @@ ThreeDL::CameraController::CameraController(const vec3& position, const vec3& ro
 {}
 
 void ThreeDL::CameraController::tick() {
-    const uint8_t* keys = SDL_GetKeyboardState(nullptr);
+    const uint8_t *keys = SDL_GetKeyboardState(nullptr);
+
+    if (rotation_enabled_) {
+        SDL_GetMouseState(&mouse_x_, &mouse_y_);
+
+        int posx = mouse_x_ - screen_centre_x_;
+        int posy = mouse_y_ - screen_centre_y_;
+
+        int deltax = posx - mouse_prev_x_;
+        int deltay = posy - mouse_prev_y_;
+
+        mouse_prev_x_ = posx;
+        mouse_prev_y_ = posy;
+
+        camera_.rotate({((float) deltay) / 50, -((float) deltax) / 50, 0});
+    }
 
     if (keys[SDL_SCANCODE_W]) {
         camera_.moveForward(-0.1);

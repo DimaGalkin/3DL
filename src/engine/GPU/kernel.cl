@@ -111,12 +111,12 @@ void project (
 void projectshadow (
     const struct Triangle* in,
     struct ScreenTriangle* out,
-    struct State* info
+    struct GPULight* info
 ) {
     float fov = info->fov_;
-    float dtp = ((float)info->width_ / 2.0) / tan((fov / 2.0) * (M_PI / 180.0));
-    float h_height = (float)info->height_ / 2.0;
-    float h_width = (float)info->width_ / 2.0;
+    float dtp = ((float)info->shadow_map_width_ / 2.0) / tan((fov / 2.0) * (M_PI / 180.0));
+    float h_height = (float)info->shadow_map_height_ / 2.0;
+    float h_width = (float)info->shadow_map_width_ / 2.0;
 
     float t1 = (dtp - 0) / in->v1.z;
     float t2 = (dtp - 0) / in->v2.z;
@@ -133,26 +133,22 @@ void projectshadow (
     out->v3.x = in->v3.x * t3 + h_width;
     out->v3.y = in->v3.y * t3 + h_height;
     out->v3.depth_info_ = in->v3.z;
-
-    out->t1 = in->t1;
-    out->t2 = in->t2;
-    out->t3 = in->t3;
 }
 
 void projectvertex(
     const struct Vector3* in,
     struct Vector2* out,
-    struct GPULight* light
+    struct GPULight* info
 ) {
-    float fov = light->fov_;
-    float dtp = ((float)light->shadow_map_width_ / 2.0) / tan((fov / 2.0) * (M_PI / 180.0));
-    float h_height = (float)light->shadow_map_height_ / 2.0;
-    float h_width = (float)light->shadow_map_width_ / 2.0;
+    float fov = info->fov_;
+    float dtp = ((float)info->shadow_map_width_ / 2.0) / tan((fov / 2.0) * (M_PI / 180.0));
+    float h_height = (float)info->shadow_map_height_ / 2.0;
+    float h_width = (float)info->shadow_map_width_ / 2.0;
 
-    float t = (dtp - 0) / in->z;
+    float t1 = (dtp - 0) / in->z;
 
-    out->x = in->x * t + h_width;
-    out->y = in->y * t + h_height;
+    out->x = in->x * t1 + h_width;
+    out->y = in->y * t1 + h_height;
     out->depth_info_ = in->z;
 }
 
@@ -193,7 +189,7 @@ unsigned char clip(
     }
 
     if (info1.valid_ && info2.valid_ && info3.valid_) {
-        printf("1 This should never happen\n");
+        //printf("1 This should never happen\n");
         return 0;
     }
 
@@ -202,12 +198,12 @@ unsigned char clip(
         !info1.valid_ && info2.valid_ && !info3.valid_,
         info1.valid_ && !info2.valid_ && !info3.valid_
     ) {
-        printf("2 This should never happen\n");
+        //printf("2 This should never happen\n");
         return 0;
     }
 
     if (info1.valid_ && info2.valid_ && info3.valid_) {
-        printf("3 This should never happen\n");
+        //printf("3 This should never happen\n");
         return 0;
     }
 
@@ -516,7 +512,7 @@ void rasterise_shadow(
     struct State* info,
     const struct GPULight* light,
     global float* zbuffer,
-    global uint* shadow_map
+    global float* shadow_map
 ) {
     if (tri->v1.y < tri->v2.y) {
         struct Vector2 temp = tri->v1;
@@ -590,10 +586,8 @@ void rasterise_shadow(
             struct Vector2 intersect3 = {j, y, 0};
             intersect3.depth_info_ = interpolateZ(&intersect1, &intersect2, &intersect3);
 
-            struct Vector3 isect3 = {intersect3.x, intersect3.y, intersect3.depth_info_};
-
-            if ((int)y < light->shadow_map_height_ && (int)y >= 0 && j < light->shadow_map_width_ && j >= 0 && intersect3.depth_info_ > zbuffer[(int)(j + y * light->shadow_map_width_)]) {
-                shadow_map[(int)(j + y * light->shadow_map_width_)] = 0xffffff;
+            if ((int)y < light->shadow_map_height_ && (int)y >= 0 && j < light->shadow_map_width_ && j >= 0 && intersect3.depth_info_ > shadow_map[(int)(j + y * light->shadow_map_width_)]){
+                shadow_map[(int)(j + y * light->shadow_map_width_)] = intersect3.depth_info_;
             }
         }
     }
@@ -627,20 +621,146 @@ void fromCameraSpace(
     Vec3Rotate(out, &camera_rot);
 }
 
+void GetAnglesBetweenVectors(
+    struct Vector3* a,
+    struct Vector3* b,
+    struct Vector3* angles
+) {
+    struct Vector2 aYZ = {a->y, a->z};
+    struct Vector2 bYZ = {b->y, b->z};
+
+    struct Vector2 aXZ = {a->x, a->z};
+    struct Vector2 bXZ = {b->x, b->z};
+
+    struct Vector2 aXY = {a->x, a->y};
+    struct Vector2 bXY = {b->x, b->y};
+
+    angles->x = acos(Vec2Dot(&aYZ, &bYZ));
+    angles->y = acos(Vec2Dot(&aXZ, &bXZ));
+    angles->z = acos(Vec2Dot(&aXY, &bXY));
+}
+
 void kernel gpu_shadow (
     global struct Triangle* tris,
-    global uint* shadow_map,
+    global float* shadow_map,
     global const struct GPULight* light_ptr,
     global const struct State* info,
     global const float* zbuffer
 ) {
     const int tri_num = get_global_id(0);
 
-    struct Triangle tri = tris[tri_num];
-    //if (backfacecull(&tri)) return;
+    struct Triangle tri_cpy = tris[tri_num];
 
-    float z = (tri.v1.z + tri.v2.z + tri.v3.z) / 3.0;
-    //printf("z: %f\n", z);
+    struct Vector3 light_rotation = {90, 0, 0};
+
+    // Vec3Add(&tri_cpy.v1, &info->model_position_, &tri_cpy.v1);
+    // Vec3Add(&tri_cpy.v2, &info->model_position_, &tri_cpy.v2);
+    // Vec3Add(&tri_cpy.v3, &info->model_position_, &tri_cpy.v3);
+
+    Vec3Subtract(&tri_cpy.v1, &light_ptr->position_, &tri_cpy.v1);
+    Vec3Subtract(&tri_cpy.v2, &light_ptr->position_, &tri_cpy.v2);
+    Vec3Subtract(&tri_cpy.v3, &light_ptr->position_, &tri_cpy.v3);
+
+    Vec3Rotate(&tri_cpy.v1, &light_rotation);
+    Vec3Rotate(&tri_cpy.v2, &light_rotation);
+    Vec3Rotate(&tri_cpy.v3, &light_rotation);
+
+    Vec3Rotate(&tri_cpy.n1, &light_rotation);
+    Vec3Rotate(&tri_cpy.n2, &light_rotation);
+    Vec3Rotate(&tri_cpy.n3, &light_rotation);
+
+    if (backfacecull(&tri_cpy)) return;
+
+    struct Triangle tri_near_clipped[2];
+    struct Triangle tri_left_clipped[2];
+    struct Triangle tri_right_clipped[2];
+    struct Triangle tri_bottom_clipped[2];
+    struct Triangle tri_top_clipped[2];
+
+    struct Plane near = {
+        {0, 0, -1},
+        {0, 0, -1},
+        {1, 0, 0}
+
+    };
+
+    struct Plane left = {
+        {-1, 0, 0},
+        {0, 0, 0},
+        {0, 0, -1}
+    };
+
+    struct Plane right = {
+        {1, 0, 0},
+        {0, 0, 0},
+        {0, 0, -1}
+    };
+
+    struct Plane bottom = {
+        {0, 1, 0},
+        {0, 0, 0},
+        {0, 0, -1}
+    };
+
+    struct Plane top = {
+        {0, -1, 0},
+        {0, 0, 0},
+        {0, 0, -1}
+    };
+
+    // Vec3Rotateate left and right planes as they are at the angle of fov/2
+    struct Vector3 r = {0, -light_ptr->fov_/2, 0};
+    Vec3Rotate(&left.direction_, &r);
+    Vec3Rotate(&left.normal_, &r);
+    r.y = r.y * -1;
+    Vec3Rotate(&right.direction_, &r);
+    Vec3Rotate(&right.normal_, &r);
+
+    float half_width = light_ptr->shadow_map_width_ / 2;
+    float half_height = light_ptr->shadow_map_height_ / 2;
+    float half_fov = light_ptr->fov_ / 2;
+
+    float horiz_fov = atan((half_height * tan(half_fov * (M_PI / 180.0)))/(half_width)) * (180.0 / M_PI);
+
+    struct Vector3 r2 = {-horiz_fov, 0, 0};
+    Vec3Rotate(&bottom.direction_, &r2);
+    Vec3Rotate(&bottom.normal_, &r2);
+    r2.x = r2.x * -1;
+    Vec3Rotate(&top.direction_, &r2);
+    Vec3Rotate(&top.normal_, &r2);
+
+    unsigned char near_clipped = clip(&tri_cpy, &near, tri_near_clipped);
+
+    if (near_clipped == 0) return;
+
+    for (int i = 0; i < near_clipped; ++i) {
+        unsigned char left_clipped = clip(&tri_near_clipped[i], &left, tri_left_clipped);
+
+        if (left_clipped == 0) continue;
+
+        for (int j = 0; j < left_clipped; ++j) {
+            unsigned char right_clipped = clip(&tri_left_clipped[j], &right, tri_right_clipped);
+
+            if (right_clipped == 0) continue;
+
+            for (int k = 0; k < right_clipped; ++k) {
+                unsigned char bottom_clipped = clip(&tri_right_clipped[k], &bottom, tri_bottom_clipped);
+                if (bottom_clipped == 0) continue;
+
+                for (int l = 0; l < bottom_clipped; ++l) {
+                    unsigned char top_clipped = clip(&tri_bottom_clipped[l], &top, tri_top_clipped);
+
+                    if (top_clipped == 0) continue;
+
+                    for (int m = 0; m < top_clipped; ++m) {
+                        struct ScreenTriangle tri_screen;
+                        projectshadow(&tri_top_clipped[m], &tri_screen, light_ptr);
+                        rasterise_shadow(&tri_screen, info, light_ptr, zbuffer, shadow_map);
+                    }
+                }
+            }
+        }
+    }
 
     return;
 }
@@ -705,25 +825,6 @@ void rotateAboutAxis(
     out->z = z2;
 }
 
-void GetAnglesBetweenVectors(
-    struct Vector3* a,
-    struct Vector3* b,
-    struct Vector3* angles
-) {
-    struct Vector2 aYZ = {a->y, a->z};
-    struct Vector2 bYZ = {b->y, b->z};
-
-    struct Vector2 aXZ = {a->x, a->z};
-    struct Vector2 bXZ = {b->x, b->z};
-
-    struct Vector2 aXY = {a->x, a->y};
-    struct Vector2 bXY = {b->x, b->y};
-
-    angles->x = acos(Vec2Dot(&aYZ, &bYZ));
-    angles->y = acos(Vec2Dot(&aXZ, &bXZ));
-    angles->z = acos(Vec2Dot(&aXY, &bXY));
-}
-
 void toCameraSpace(
     struct Vector3* in,
     struct Vector3* out,
@@ -742,6 +843,7 @@ bool vertexInCone(
     float fov
 ) {
     float rs = fov * (M_PI / 180.0);
+    rs = rs / 2;
 
     struct Vector3 light_dir_norm = {0, 0, -1};
     normalize(&light_dir_norm, &light_dir_norm);
@@ -754,9 +856,15 @@ bool vertexInCone(
     return dot > cos(rs);
 }
 
+bool equaltowithinpercent(float a, float b, float percent) {
+    float diff = a * 0.01;
+
+    return (a - diff >= b && a + diff <= b) || (b - diff >= a && b + diff <= a);
+}
+
 void kernel gpu_lighting (
     global uint* pixels,
-    global uint* shadow_map,
+    global float* shadow_map,
     global uint* C,
     global const struct GPULight* light_ptr,
     global const struct State* info,
@@ -816,59 +924,9 @@ void kernel gpu_lighting (
 
         toCameraSpace(&position, &position, info);
 
-        struct Plane near = {
-            {0, 0, -1},
-            {0, 0, -1},
-            {1, 0, 0}
-
-        };
-
-        struct Plane left = {
-            {-1, 0, 0},
-            {0, 0, 0},
-            {0, 0, -1}
-        };
-
-        struct Plane right = {
-            {1, 0, 0},
-            {0, 0, 0},
-            {0, 0, -1}
-        };
-
-        struct Plane bottom = {
-            {0, 1, 0},
-            {0, 0, 0},
-            {0, 0, -1}
-        };
-
-        struct Plane top = {
-            {0, -1, 0},
-            {0, 0, 0},
-            {0, 0, -1}
-        };
-
-        // Vec3Rotateate left and right planes as they are at the angle of fov/2
-        struct Vector3 r = {0, -light.fov_/2, 0};
-        Vec3Rotate(&left.direction_, &r);
-        Vec3Rotate(&left.normal_, &r);
-        r.y = r.y * -1;
-        Vec3Rotate(&right.direction_, &r);
-        Vec3Rotate(&right.normal_, &r);
-
-        float half_width = light.shadow_map_width_ / 2;
-        float half_height = light.shadow_map_height_ / 2;
-        float half_fov = light.fov_ / 2;
-
-        float horiz_fov = atan((half_height * tan(half_fov * (M_PI / 180.0)))/(half_width)) * (180.0 / M_PI);
-
-        struct Vector3 r2 = {-horiz_fov, 0, 0};
-        Vec3Rotate(&bottom.direction_, &r2);
-        Vec3Rotate(&bottom.normal_, &r2);
-        r2.x = r2.x * -1;
-        Vec3Rotate(&top.direction_, &r2);
-        Vec3Rotate(&top.normal_, &r2);
-
         Vec3Subtract(&p, &light_pos, &p);
+        // struct Vector3 light_rotation = {90, 0, 0};
+        // Vec3Rotate(&p, &light_rotation);
 
         struct Vector3 angles;
         struct Vector3 forward = {0, 0, -1};
@@ -882,14 +940,24 @@ void kernel gpu_lighting (
         rotateAboutAxis(&p, &axis, angles.x, &p);
         rotateAboutAxis(&p, &axis, angles.z, &p);
 
-        projectvertex(&p, &projected, &light);
+        projectvertex(&p, &projected, light_ptr);
 
         if (!vertexInCone(&light_dir, &p, light.fov_)) {
             return;
         }
 
-        int x = (int)projected.x;
-        int y = (int)projected.y;
+        int x = abs((int)projected.x);
+        int y = abs((int)projected.y);
+
+        if (x < 0 || x >= light.shadow_map_width_ || y < 0 || y >= light.shadow_map_height_) {
+            printf("%d %d\n", x, y);
+            return;
+        } else {
+            //printf("%f %f\n", shadow_map[x + y * light.shadow_map_width_], p.z);
+            if (!equaltowithinpercent(shadow_map[x + y * light.shadow_map_width_], p.z, 1)) {
+                return;
+            }
+        }
 
         Vec3Subtract(&light.position_, &info->camera_position_, &light.position_);
         Vec3Rotate(&light.position_, &info->camera_rotation_);
@@ -912,7 +980,7 @@ void kernel gpu_lighting (
 
             float specAngle = Vec3Dot(&halfDir, &normal);
             specAngle = maxf(specAngle, 0.0);
-            spec = pow(specAngle, 80);
+            spec = pow(specAngle, 10);
         }
 
         struct Vector3 color;
@@ -960,7 +1028,6 @@ void kernel gpu_lighting (
     pixel_val = maxhex(pixel_val, 0);
     
     pixels[pixel_num] = pixel_val;
-
 }
 
 void draw(
@@ -1080,6 +1147,10 @@ void draw(
 
                 uint pixel = texture[u + v * info->texture_width_];
 
+                if (info->texture_width_ == 1 && info->texture_height_ == 1) {
+                    pixel = texture[0];
+                }
+
                 struct TriangleStore bb = {
                     tri->v1, tri->v2, tri->v3,
                     pixel,
@@ -1149,8 +1220,6 @@ kernel void gpu_fragment(
     if (!tri->valid_) return;
     struct Vector3 ts = Ts[pixel_num];
 
-    // int x = pixel_num % info->width_;
-    uint y = pixel_num / info->width_;
     bool top_half = tri->top_;
     bool swap = tri->swap_;
 

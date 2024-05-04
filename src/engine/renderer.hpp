@@ -59,7 +59,7 @@ namespace ThreeDL {
               * @method Renderer Constructor
               * @about This constructor takes a reference to a camera controller, this will extract the camera reference from the controller.
             */
-            Renderer(const CameraController& controller, const uint32_t width, const uint32_t height);
+            Renderer(CameraController& controller, const uint32_t width, const uint32_t height);
 
             // Need camera and size info
             Renderer() = delete;
@@ -99,7 +99,9 @@ namespace ThreeDL {
 
             std::mutex render_mutex_;
             Camera& camera_;
+            CameraController* controller_;
 
+            bool camera_controller_ = false;
             bool anim_enabled_ = true;
             bool client_quit_ = false;
             bool frame_ready_ = false;
