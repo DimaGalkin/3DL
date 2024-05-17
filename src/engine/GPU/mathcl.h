@@ -146,7 +146,7 @@ void Vec2Subtract(
 ) {
     out->x = v1->x - v2->x;
     out->y = v1->y - v2->y;
-    out->texture_info_ = v1->texture_info_ - v2->texture_info_;
+    out->depth_info_ = v1->depth_info_ - v2->depth_info_;
 }
 
 void Vec2Add(
@@ -156,7 +156,7 @@ void Vec2Add(
 ) {
     out->x = v1->x + v2->x;
     out->y = v1->y + v2->y;
-    out->texture_info_ = v1->texture_info_ + v2->texture_info_;
+    out->depth_info_ = v1->depth_info_ + v2->depth_info_;
 }
 
 void Vec2Multiply(
@@ -166,7 +166,7 @@ void Vec2Multiply(
 ) {
     out->x = v1->x * v2;
     out->y = v1->y * v2;
-    out->texture_info_ = v1->texture_info_ * v2;
+    out->depth_info_ = v1->depth_info_ * v2;
 }
 
 void Vec2Divide(
@@ -309,7 +309,7 @@ void interpolate(
 ) {
     out->x = start->x + dir->x * t;
     out->y = start->y + dir->y * t;
-    out->texture_info_ = start->texture_info_ + dir->texture_info_ * t;
+    out->depth_info_ = start->depth_info_ + dir->depth_info_ * t;
 }
 
 void interpolateAB(

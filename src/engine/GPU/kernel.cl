@@ -104,8 +104,13 @@ void project (
     out->v3.depth_info_ = in->v3.z;
 
     out->t1 = in->t1;
+    out->t1.depth_info_ = in->v1.z;
+
     out->t2 = in->t2;
+    out->t2.depth_info_ = in->v2.z;
+
     out->t3 = in->t3;
+    out->t3.depth_info_ = in->v3.z;
 }
 
 void projectshadow (
@@ -150,6 +155,26 @@ void projectvertex(
     out->x = in->x * t1 + h_width;
     out->y = in->y * t1 + h_height;
     out->depth_info_ = in->z;
+}
+
+void projectanddrawline(
+    struct Vector3* a,
+    struct Vector3* b,
+    const struct State* info,
+    global int* C
+) {
+    struct Vector2 a2;
+    struct Vector2 b2;
+
+    projectvertex(a, &a2, info);
+    projectvertex(b, &b2, info);
+
+    draw_line(
+        (int)a2.x, (int)a2.y,
+        (int)b2.x, (int)b2.y,
+        info,
+        C
+    );
 }
 
 unsigned char clip(
@@ -385,10 +410,10 @@ float interpolateZ(
     float denom = p2->x - p1->x;
     float t;
 
-    if (abs_d(denom) < 0.0001) {
+    if (abs_d(denom) < 0.001) {
         denom = p2->y - p1->y;
 
-        if (abs_d(denom) < 0.0001) {
+        if (abs_d(denom) < 0.001) {
             return p1->depth_info_;
         }
 
@@ -485,8 +510,8 @@ void sortTri(
     }
 }
 
-float3 asFloat3(struct Vector3 in) {
-    return (float3){in.x, in.y, in.z};
+float3 asFloat3(struct Vector2 in) {
+    return (float3){in.x, in.y, in.depth_info_};
 }
 
 float2 asFloat2(struct Vector2 in) {
@@ -504,7 +529,7 @@ bool backfacecull(const struct Triangle* tr) {
 
     float dp = Vec3Dot(&normal, &view);
 
-    return dp > 0;
+    return dp < 0;
 }
 
 void rasterise_shadow(
@@ -887,6 +912,7 @@ void kernel gpu_lighting (
 
     struct Vector3 normal = normals[pixel_num];
     struct Vector3 position = positions[pixel_num];
+
     const uint diffuseColorHex = diffuseColors[pixel_num];
     const uint specularColorHex = specularColors[pixel_num];
 
@@ -925,8 +951,6 @@ void kernel gpu_lighting (
         toCameraSpace(&position, &position, info);
 
         Vec3Subtract(&p, &light_pos, &p);
-        // struct Vector3 light_rotation = {90, 0, 0};
-        // Vec3Rotate(&p, &light_rotation);
 
         struct Vector3 angles;
         struct Vector3 forward = {0, 0, -1};
@@ -949,15 +973,15 @@ void kernel gpu_lighting (
         int x = abs((int)projected.x);
         int y = abs((int)projected.y);
 
-        if (x < 0 || x >= light.shadow_map_width_ || y < 0 || y >= light.shadow_map_height_) {
-            printf("%d %d\n", x, y);
-            return;
-        } else {
-            //printf("%f %f\n", shadow_map[x + y * light.shadow_map_width_], p.z);
-            if (!equaltowithinpercent(shadow_map[x + y * light.shadow_map_width_], p.z, 1)) {
-                return;
-            }
-        }
+        //if (x < 0 || x >= light.shadow_map_width_ || y < 0 || y >= light.shadow_map_height_) {
+          //  printf("%d %d\n", x, y);
+            //return;
+        //} else {
+          //  //printf("%f %f\n", shadow_map[x + y * light.shadow_map_width_], p.z);
+           // if (!equaltowithinpercent(shadow_map[x + y * light.shadow_map_width_], p.z, 1)) {
+             //   return;
+            //}
+        //}
 
         Vec3Subtract(&light.position_, &info->camera_position_, &light.position_);
         Vec3Rotate(&light.position_, &info->camera_rotation_);
@@ -1021,13 +1045,21 @@ void kernel gpu_lighting (
     r = min(r, 255);
     g = min(g, 255);
     b = min(b, 255);
-    
+
     uint pixel_val = pixels[pixel_num] + ((r << 16) | (g << 8) | b);
-    
+
     pixel_val = minhex(pixel_val, 0xffffff);
     pixel_val = maxhex(pixel_val, 0);
-    
+
     pixels[pixel_num] = pixel_val;
+}
+
+void Vec2ConvertCoords(
+    struct Vector2* vec
+) {
+    vec->x /= vec->depth_info_;
+    vec->y /= vec->depth_info_;
+    vec->depth_info_ = 1 / vec->depth_info_;
 }
 
 void draw(
@@ -1042,9 +1074,9 @@ void draw(
 ) {
     sortTri(tri, gsp_tri);
 
-    float yMax = tri->v1.y;
-    float yMid = tri->v2.y;
-    float yMin = tri->v3.y;
+    float yMax = floor(tri->v1.y);
+    float yMid = floor(tri->v2.y);
+    float yMin = floor(tri->v3.y);
 
     float2 horiz = {1, 0};
     float2 line_one = asFloat2(tri->v1);
@@ -1058,13 +1090,17 @@ void draw(
     struct Line line1 = {tri->v1, tri->v3};
     struct Line line2 = {tri->v2, tri->v1};
 
-    float2 uvOne = asFloat2(tri->t1);
-    float2 uvTwo = asFloat2(tri->t1);
-    float2 uv_on_line = asFloat2(tri->t3);
-    float2 uv_on_line2 = asFloat2(tri->t2);
-    
-    uvOne -= asFloat2(tri->t3);
-    uvTwo -= asFloat2(tri->t2);
+    Vec2ConvertCoords(&tri->t1);
+    Vec2ConvertCoords(&tri->t2);
+    Vec2ConvertCoords(&tri->t3);
+
+    float3 uvOne = asFloat3(tri->t1);
+    float3 uvTwo = asFloat3(tri->t1);
+    float3 uv_on_line = asFloat3(tri->t3);
+    float3 uv_on_line2 = asFloat3(tri->t2);
+
+    uvOne -= asFloat3(tri->t3);
+    uvTwo -= asFloat3(tri->t2);
 
     int xMaxx;
 
@@ -1078,9 +1114,9 @@ void draw(
             on_line2 = asFloat2(tri->v3);
             line2 = (struct Line){tri->v3, tri->v2};
 
-            uv_on_line2 = asFloat2(tri->t3);
-            uvTwo = asFloat2(tri->t2);
-            uvTwo -= asFloat2(tri->t3);
+            uv_on_line2 = asFloat3(tri->t3);
+            uvTwo = asFloat3(tri->t2);
+            uvTwo -= asFloat3(tri->t3);
 
             top = false;
         }
@@ -1114,9 +1150,9 @@ void draw(
             swap = false;
         }
 
-        float xMin = (int)intersect1.x;
-        float xMax = (int)intersect2.x;
-        float y = (int)intersect1.y;
+        float xMin = floor(intersect1.x);
+        float xMax = floor(intersect2.x);
+        int y = (int)floor(intersect1.y);
         int xMaxx = xMax;
 
         int uv_min = (uvIntersect1.x < uvIntersect2.x) ? uvIntersect1.x : uvIntersect2.x;
@@ -1133,19 +1169,24 @@ void draw(
             Vec2Subtract(&isectDir, &uvIntersect1, &isectDir);
             interpolate(&uvIntersect1, &isectDir, t, &uvIntersect3);
 
-            if ((int)y < info->height_ && (int)y >= 0 && j < info->width_ && j >= 0 && intersect3.depth_info_ > zbuffer[(int)(j + y * info->width_)]) {                
+            if ((int)y < info->height_ && (int)y >= 0 && j < info->width_ && j >= 0 && intersect3.depth_info_ > zbuffer[(int)(j + y * info->width_)]) {
                 struct Vector3 aa = {l1t, l2t, t};
                 Ts[(int)(j + y * info->width_)] = aa;
 
-                const uint u = floor(uvIntersect3.x * info->texture_width_);
-                const uint v = info->texture_height_ - floor(uvIntersect3.y * info->texture_height_);
+                uvIntersect3.depth_info_ = 1 / uvIntersect3.depth_info_;
+                float uu = uvIntersect3.x * uvIntersect3.depth_info_;
+                float vv = uvIntersect3.y * uvIntersect3.depth_info_;
+
+                uint u = floor(uu * info->texture_width_);
+                uint v = info->texture_height_ - floor(vv * info->texture_height_);
+
+                uint pixel;
 
                 if (u > info->texture_width_ || u < 0 || v > info->texture_height_ || v < 0) {
-                    C[(int)(j + y * info->width_)] |= 0x333333;
-                    continue;
-                };
-
-                uint pixel = texture[u + v * info->texture_width_];
+                    pixel = 0x22ffffff;
+                } else {
+                    pixel = texture[u + v * info->texture_width_];
+                }
 
                 if (info->texture_width_ == 1 && info->texture_height_ == 1) {
                     pixel = texture[0];
@@ -1225,12 +1266,12 @@ kernel void gpu_fragment(
 
     struct Vector3 normal;
     interpolateFragment(&tri->n1, &tri->n2, &tri->n3, &ts, top_half, swap, &normal);
-    normal.x *= -1; normal.y *= -1; normal.z *= -1; 
+    normal.x *= -1; normal.y *= -1; normal.z *= -1;
     normalize(&normal, &normal);
 
     struct Vector3 position;
     interpolateFragment(&tri->v1_, &tri->v2_, &tri->v3_, &ts, top_half, swap, &position);
-    
+
     pixels[pixel_num] = tri->texture_;
     normals[pixel_num] = normal;
     positions[pixel_num] = position;
@@ -1262,9 +1303,9 @@ kernel void gpu_render (
     // make a copy of the triangle
     struct Triangle tri_cpy = A[gid];
 
-    Vec3Add(&tri_cpy.v1, &info->model_position_, &tri_cpy.v1);
-    Vec3Add(&tri_cpy.v2, &info->model_position_, &tri_cpy.v2);
-    Vec3Add(&tri_cpy.v3, &info->model_position_, &tri_cpy.v3);
+    Vec3Subtract(&tri_cpy.v1, &info->model_position_, &tri_cpy.v1);
+    Vec3Subtract(&tri_cpy.v2, &info->model_position_, &tri_cpy.v2);
+    Vec3Subtract(&tri_cpy.v3, &info->model_position_, &tri_cpy.v3);
 
     struct Vector3 posv1 = tri_cpy.v1;
     struct Vector3 posv2 = tri_cpy.v2;

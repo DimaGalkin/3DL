@@ -23,7 +23,6 @@ struct Vector2 {
     float y;
 
     float depth_info_;
-    float texture_info_;
 };
 
 struct Vector3 {

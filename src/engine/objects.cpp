@@ -161,7 +161,7 @@ std::vector<Triangle> ThreeDL::OBJLoader::load(const std::string& path) {
             vertices.emplace(
                 vertex_index,
                 Vector3 {
-                    std::stod(tokens[0]),
+                    -std::stod(tokens[0]),
                     std::stod(tokens[1]),
                     std::stod(tokens[2]),
                     0
