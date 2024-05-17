@@ -1,4 +1,0 @@
-/home/dima/Projects/3DL/CMakeFiles/iact.dir
-/home/dima/Projects/3DL/CMakeFiles/3DL.dir
-/home/dima/Projects/3DL/CMakeFiles/edit_cache.dir
-/home/dima/Projects/3DL/CMakeFiles/rebuild_cache.dir

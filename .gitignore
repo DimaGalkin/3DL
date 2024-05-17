@@ -35,3 +35,16 @@
 cmake-build-debug/
 *.png
 *.jpg
+
+.cmake/
+.vscode/
+build/
+CMakeFiles/
+Testing/
+.clang-format
+.ninja_deps
+.ninja_log
+build.ninja
+cmake_install.cmake
+CMakeCache.txt
+imgui.ini
