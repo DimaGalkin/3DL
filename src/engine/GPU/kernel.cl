@@ -970,18 +970,18 @@ void kernel gpu_lighting (
             return;
         }
 
-        int x = abs((int)projected.x);
-        int y = abs((int)projected.y);
+        // int x = abs((int)projected.x);
+        // int y = abs((int)projected.y);
 
-        //if (x < 0 || x >= light.shadow_map_width_ || y < 0 || y >= light.shadow_map_height_) {
-          //  printf("%d %d\n", x, y);
-            //return;
-        //} else {
-          //  //printf("%f %f\n", shadow_map[x + y * light.shadow_map_width_], p.z);
-           // if (!equaltowithinpercent(shadow_map[x + y * light.shadow_map_width_], p.z, 1)) {
-             //   return;
-            //}
-        //}
+        // if (x < 0 || x >= light.shadow_map_width_ || y < 0 || y >= light.shadow_map_height_) {
+        //    printf("%d %d\n", x, y);
+        //     return;
+        // } else {
+        //    //printf("%f %f\n", shadow_map[x + y * light.shadow_map_width_], p.z);
+        //    if (!equaltowithinpercent(shadow_map[x + y * light.shadow_map_width_], p.z, 1)) {
+        //        return;
+        //     }
+        // }
 
         Vec3Subtract(&light.position_, &info->camera_position_, &light.position_);
         Vec3Rotate(&light.position_, &info->camera_rotation_);
@@ -1303,9 +1303,12 @@ kernel void gpu_render (
     // make a copy of the triangle
     struct Triangle tri_cpy = A[gid];
 
-    Vec3Subtract(&tri_cpy.v1, &info->model_position_, &tri_cpy.v1);
-    Vec3Subtract(&tri_cpy.v2, &info->model_position_, &tri_cpy.v2);
-    Vec3Subtract(&tri_cpy.v3, &info->model_position_, &tri_cpy.v3);
+    struct Vector3 model_pos = info->model_position_;
+    //model_pos.x *= -1;
+
+    Vec3Add(&tri_cpy.v1, &model_pos, &tri_cpy.v1);
+    Vec3Add(&tri_cpy.v2, &model_pos, &tri_cpy.v2);
+    Vec3Add(&tri_cpy.v3, &model_pos, &tri_cpy.v3);
 
     struct Vector3 posv1 = tri_cpy.v1;
     struct Vector3 posv2 = tri_cpy.v2;

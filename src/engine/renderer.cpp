@@ -463,53 +463,53 @@ void ThreeDL::Renderer::render() {
                     sizeof(GPULight),
                     &light
             );
-
-            if (light.type_ == LightType::DIRECTIONAL) {
-
-                light.shadow_map_width_ = 512;
-                light.shadow_map_height_ = 512;
-
-                shadow_map = cl::Buffer(
-                        ocl_utils_.context_,
-                        CL_MEM_READ_WRITE,
-                        sizeof(float) * light.shadow_map_width_ * light.shadow_map_height_
-                );
-
-                ocl_utils_.queue_.enqueueWriteBuffer(
-                        shadow_map,
-                        CL_TRUE,
-                        0,
-                        sizeof(float) * light.shadow_map_width_ * light.shadow_map_height_,
-                        shadow_map_cpu.data()
-                );
-
-                for (const auto &object: render_queue_) {
-                    cl::NDRange dims {object->triangles_.size()};
-
-                    cl::Buffer tris = cl::Buffer(
-                            ocl_utils_.context_,
-                            CL_MEM_READ_WRITE,
-                            sizeof(Triangle) * object->triangles_.size()
-                    );
-
-                    ocl_utils_.queue_.enqueueWriteBuffer(
-                            tris,
-                            CL_TRUE,
-                            0,
-                            sizeof(Triangle) * object->triangles_.size(),
-                            object->triangles_.data()
-                    );
-
-                    gpu_shadow(
-                            cl::EnqueueArgs(ocl_utils_.queue_, dims),
-                            tris,
-                            shadow_map,
-                            light_buffer,
-                            state_buffer_,
-                            zbuffer_buffer_
-                    ).wait();
-                }
-            }
+            //
+            // if (light.type_ == LightType::DIRECTIONAL) {
+            //
+            //     light.shadow_map_width_ = 512;
+            //     light.shadow_map_height_ = 512;
+            //
+            //     shadow_map = cl::Buffer(
+            //             ocl_utils_.context_,
+            //             CL_MEM_READ_WRITE,
+            //             sizeof(float) * light.shadow_map_width_ * light.shadow_map_height_
+            //     );
+            //
+            //     ocl_utils_.queue_.enqueueWriteBuffer(
+            //             shadow_map,
+            //             CL_TRUE,
+            //             0,
+            //             sizeof(float) * light.shadow_map_width_ * light.shadow_map_height_,
+            //             shadow_map_cpu.data()
+            //     );
+            //
+            //     for (const auto &object: render_queue_) {
+            //         cl::NDRange dims {object->triangles_.size()};
+            //
+            //         cl::Buffer tris = cl::Buffer(
+            //                 ocl_utils_.context_,
+            //                 CL_MEM_READ_WRITE,
+            //                 sizeof(Triangle) * object->triangles_.size()
+            //         );
+            //
+            //         ocl_utils_.queue_.enqueueWriteBuffer(
+            //                 tris,
+            //                 CL_TRUE,
+            //                 0,
+            //                 sizeof(Triangle) * object->triangles_.size(),
+            //                 object->triangles_.data()
+            //         );
+            //
+            //         gpu_shadow(
+            //                 cl::EnqueueArgs(ocl_utils_.queue_, dims),
+            //                 tris,
+            //                 shadow_map,
+            //                 light_buffer,
+            //                 state_buffer_,
+            //                 zbuffer_buffer_
+            //         ).wait();
+            //     }
+            // }
 
             gpu_lighting(
                     cl::EnqueueArgs(ocl_utils_.queue_, global),
