@@ -1512,10 +1512,8 @@ void kernel gpu_lighting (
         int y = abs((int)projected.y);
 
         if (x < 0 || x >= light.shadow_map_width_ || y < 0 || y >= light.shadow_map_height_) {
-           printf("%d %d\n", x, y);
             return;
         } else {
-           //printf("%f %f\n", shadow_map[x + y * light.shadow_map_width_], p.z);
            if (!equaltowithinpercent(shadow_map[x + y * light.shadow_map_width_], p.z, 1)) {
                return;
             }

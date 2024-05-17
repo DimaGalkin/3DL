@@ -3,8 +3,13 @@
 #ifndef float3
 typedef struct Vector3 float3;
 #endif
+
 #include "GPU/types.h"
+
+// cpp & hpp included so linking templates doesn't fail
 #include "linalg.hpp"
+#include "linalg.cpp"
+
 #include "objects.hpp"
 #include "utils.hpp"
 

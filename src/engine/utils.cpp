@@ -14,7 +14,7 @@ std::vector<std::string> ThreeDL::Utils::split(const std::string &str, const cha
 
 uint32_t ThreeDL::Utils::samplePixel(const SDL_Surface *surface, const uint32_t x, const uint32_t y) {
     const uint8_t bpp = surface->format->BytesPerPixel;
-    uint8_t *p = reinterpret_cast<uint8_t*>(surface->pixels) + y * surface->pitch + x * bpp;
+    const auto p = static_cast<uint8_t*>(surface->pixels) + y * surface->pitch + x * bpp;
 
     return *reinterpret_cast<uint32_t*>(p);
 }
@@ -27,4 +27,8 @@ void ThreeDL::Utils::uintToLinear(const uint32_t color, float* colorArray) {
     colorArray[0] = static_cast<float>((color >> 16) & 0xFF) / 255.0f;
     colorArray[1] = static_cast<float>((color >> 8) & 0xFF) / 255.0f;
     colorArray[2] = static_cast<float>(color & 0xFF) / 255.0f;
+}
+
+float ThreeDL::Utils::floatmin(const float a, const float b) {
+    return a < b ? a : b;
 }

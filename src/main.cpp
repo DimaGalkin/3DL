@@ -16,7 +16,6 @@ ThreeDL::Object plane (
 );
 
 ThreeDL::vec3 light_pos1 {plane.centre_.x, plane.centre_.y + 50, plane.centre_.z};
-ThreeDL::vec3 light_pos2 {450 , 50, -100};
 
 ThreeDL::AmbientLight ambient (
         "ambient",
@@ -51,7 +50,6 @@ void animation(uint64_t ticks) {
 }
 
 int main(const int argc, const char** argv) {
-        std::cout << plane.centre_.x << std::endl;
         renderer.animation = animation;
         renderer.add(&ambient);
 

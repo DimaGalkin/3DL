@@ -24,8 +24,8 @@ ThreeDL::Renderer::Renderer(
 {
     init();
     SDL_SetRelativeMouseMode(SDL_FALSE);
-    controller_->screen_centre_x_ = width_/2;
-    controller_->screen_centre_y_ = height_/2;
+    controller_->screen_centre_.x = static_cast<int>(width_/2);
+    controller_->screen_centre_.y = static_cast<int>(height_/2);
 }
 
 void ThreeDL::Renderer::init() {
@@ -264,8 +264,8 @@ void ThreeDL::Renderer::begin() {
 
             if (!gui_enabled_ && camera_controller_) {
                 SDL_WarpMouseInWindow(window_, width_/2, height_/2);
-                controller_->mouse_prev_x_ = 0;
-                controller_->mouse_prev_y_ = 0;
+                controller_->prev_mouse_pos_.x = 0;
+                controller_->prev_mouse_pos_.y = 0;
             }
         }
 

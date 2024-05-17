@@ -1,4 +1,3 @@
-#include <iostream>
 #include "camera.hpp"
 
 ThreeDL::Camera::Camera(const vec3& position, const vec3& rotation)
@@ -44,22 +43,22 @@ void ThreeDL::Camera::rotate(const ThreeDL::vec3& delta) {
 
 void ThreeDL::Camera::pan(const float delta) {
     rotation_.y += delta;
-    rotation_.y = fmin(rotation_.y, max_rotation_.y);
+    rotation_.y = Utils::floatmin(rotation_.y, max_rotation_.y);
 }
 
 void ThreeDL::Camera::tilt(const float delta) {
     rotation_.x += delta;
-    rotation_.x = fmin(rotation_.x, max_rotation_.x);
+    rotation_.x = Utils::floatmin(rotation_.x, max_rotation_.x);
 }
 
 void ThreeDL::Camera::roll(const float delta) {
     rotation_.z += delta;
-    rotation_.z = fmin(rotation_.z, max_rotation_.z);
+    rotation_.z = Utils::floatmin(rotation_.z, max_rotation_.z);
 }
 
 ThreeDL::CameraController::CameraController(Camera& camera)
         : camera_ {camera},
-          internal_camera_ {zero_vec3, zero_vec3, 0} // populate with dummy values
+          internal_camera_ {{0, 0, 0}, {0, 0, 0}, 0} // populate with dummy values
 {}
 
 ThreeDL::CameraController::CameraController(const vec3& position, const vec3& rotation, const float fov)
@@ -68,21 +67,24 @@ ThreeDL::CameraController::CameraController(const vec3& position, const vec3& ro
 {}
 
 void ThreeDL::CameraController::tick() {
-    const uint8_t *keys = SDL_GetKeyboardState(nullptr);
+    const uint8_t* keys = SDL_GetKeyboardState(nullptr);
 
     if (rotation_enabled_) {
         SDL_GetMouseState(&mouse_x_, &mouse_y_);
 
-        int posx = mouse_x_ - screen_centre_x_;
-        int posy = mouse_y_ - screen_centre_y_;
+        const int posx = mouse_x_ - screen_centre_.x;
+        const int posy = mouse_y_ - screen_centre_.y;
+        const auto deltax = static_cast<float>(posx - prev_mouse_pos_.x);
+        const auto deltay = static_cast<float>(posy - prev_mouse_pos_.y);
 
-        int deltax = posx - mouse_prev_x_;
-        int deltay = posy - mouse_prev_y_;
+        prev_mouse_pos_.x = posx;
+        prev_mouse_pos_.y = posy;
 
-        mouse_prev_x_ = posx;
-        mouse_prev_y_ = posy;
-
-        camera_.rotate({((float) deltay) / 50, -((float) deltax) / 50, 0});
+        camera_.rotate({
+            (deltay) / rotation_speed_,
+            -(deltax) / rotation_speed_,
+            0}
+        );
     }
 
     if (keys[SDL_SCANCODE_W]) {
@@ -120,10 +122,10 @@ void ThreeDL::CameraController::tick() {
     camera_.recalculateVectors();
 }
 
-void ThreeDL::CameraController::translate(const vec3& delta) {
+void ThreeDL::CameraController::translate(const vec3& delta) const {
     camera_.position_ += delta;
 }
 
-void ThreeDL::CameraController::rotate(const vec3& delta) {
+void ThreeDL::CameraController::rotate(const vec3& delta) const  {
     camera_.rotate(delta);
 }

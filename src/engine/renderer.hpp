@@ -45,19 +45,19 @@ namespace ThreeDL {
 
     /**
      * @class Renderer
-     * @about Encapsulates a 3D scene, provides debugging tools (GUI) and uses OpenCL to render the scene.
+     * @brief Encapsulates a 3D scene, provides debugging tools (GUI) and uses OpenCL to render the scene.
      */
     class Renderer {
         public:
             /**
              * @method Renderer Constructor
-             * @about This constructor takes a reference to a camera, not const as renderer may adjust internal values.
+             * @brief This constructor takes a reference to a camera, not const as renderer may adjust internal values.
             */
             Renderer(Camera& camera, const uint32_t width, const uint32_t height);
 
             /**
               * @method Renderer Constructor
-              * @about This constructor takes a reference to a camera controller, this will extract the camera reference from the controller.
+              * @brief This constructor takes a reference to a camera controller, this will extract the camera reference from the controller.
             */
             Renderer(CameraController& controller, const uint32_t width, const uint32_t height);
 
@@ -66,20 +66,20 @@ namespace ThreeDL {
 
             /**
              * @method add
-             * @about adds an Object (triangles & texture) or a light to the render pipeline.
+             * @brief adds an Object (triangles & texture) or a light to the render pipeline.
             */
             void add(const Object* object);
             void add(Light* light);
 
             /**
              * @method animation
-             * @about user defined method called every millisecond, can be used to create moving objects.
+             * @brief user defined method called every millisecond, can be used to create moving objects.
             */
             void (*animation)(uint64_t ticks) = nullptr;
 
             /**
              * @method begin
-             * @about Creates SDL window and stats scanning inputs and launches render thread which makes calls to GPU.
+             * @brief Creates SDL window and stats scanning inputs and launches render thread which makes calls to GPU.
             */
             void begin();
 
