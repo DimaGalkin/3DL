@@ -18,10 +18,7 @@ typedef struct Vector3 float3;
 #endif
 
 #include "GPU/types.h"
-
-// cpp & hpp included so linking templates doesn't fail
 #include "linalg.hpp"
-#include "linalg.cpp"
 
 namespace ThreeDL {
     using tri_allocator_t = cl::SVMAllocator<Triangle, cl::SVMTraitCoarse<>>;
@@ -56,6 +53,14 @@ namespace ThreeDL {
             void fillTextureBuffer(const std::string& texture_path);
             void fillTextureBuffer(const uint32_t color);
             void fillTriangleBuffer(const std::string& model_path, const FILEFORMAT format);
+    };
+
+    class Mesh {
+        public:
+            Mesh() = default;
+
+            ~Mesh() = default;
+        private:
     };
 
     class OBJLoader {

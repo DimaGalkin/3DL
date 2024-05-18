@@ -4,10 +4,7 @@
 #include <cmath>
 
 #include "utils.hpp"
-
-// cpp & hpp included so linking templates doesn't fail
 #include "linalg.hpp"
-#include "linalg.cpp"
 
 namespace ThreeDL {
     /**

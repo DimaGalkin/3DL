@@ -3,10 +3,7 @@
 #include "GPU/types.h"
 #include "objects.hpp"
 #include "utils.hpp"
-
-// cpp & hpp included so linking templates doesn't fail
 #include "linalg.hpp"
-#include "linalg.cpp"
 
 namespace ThreeDL {
     /**
@@ -15,40 +12,40 @@ namespace ThreeDL {
     */
     class Light {
         public:
-            Light();
+					Light();
 
-    				/**
-						 * Exports the member variables of the class into a struct that is defined in GPU/types.h.
-						*/
-    				GPULight asGPUType() const;
+					/**
+					 * Exports the member variables of the class into a struct that is defined in GPU/types.h.
+					*/
+					GPULight asGPUType() const;
 
-            /**
-             * Returns the reference to the position of the model so that it may be changed by the user.
-            */
-            ThreeDL::vec3& getModelPosition() { return model_.position_; }
+					/**
+					 * Returns the reference to the position of the model so that it may be changed by the user.
+					*/
+					ThreeDL::vec3& getModelPosition() { return model_.position_; }
 
-            /**
-             * Returns values restrict the user from being able to change protected values. Changing these
-             * values will result in undefined behavior.
-            */
-            std::string getName() const { return name_; }
-    				LightType getType() const { return type_; }
-    				Object getModel() const { return model_; }
+					/**
+					 * Returns values restrict the user from being able to change protected values. Changing these
+					 * values will result in undefined behavior.
+					*/
+					std::string getName() const { return name_; }
+					LightType getType() const { return type_; }
+					Object getModel() const { return model_; }
 
-    				vec3 position_;
-    				vec3 direction_; // direction vector of light
+					vec3 position_;
+					vec3 direction_; // direction vector of light
 
-    				bool model_enabled_ = true;
+					bool model_enabled_ = true;
 
-    				float intensity_;
-    				float color_[3]; // RGB color of light
-    				float fov_; // field of view of light in degrees
+					float intensity_;
+					float color_[3]; // RGB color of light
+					float fov_; // field of view of light in degrees
 
-    				bool shadows_enabled_ = true;
-    				uint32_t shadowmap_w_ = 1024;
-    				uint32_t shadowmap_h_ = 1024;
+					bool shadows_enabled_ = true;
+					uint32_t shadowmap_w_ = 1024;
+					uint32_t shadowmap_h_ = 1024;
 
-    				~Light() = default;
+					~Light() = default;
 
         protected:
 		        Object model_; // stores the model of the light source

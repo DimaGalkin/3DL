@@ -137,7 +137,6 @@ add_executable(3DL
         src/engine/camera.hpp
         src/engine/lighting.cpp
         src/engine/lighting.hpp
-        src/engine/linalg.cpp
         src/engine/linalg.hpp
         src/engine/objects.cpp
         src/engine/objects.hpp
