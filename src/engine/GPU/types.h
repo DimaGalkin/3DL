@@ -137,8 +137,6 @@ struct GPULight {
 
     uint32_t color_;
 
-    bool first_;
-
     float intensity_;
 };
 

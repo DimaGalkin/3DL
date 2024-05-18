@@ -46,7 +46,7 @@ void animation(uint64_t ticks) {
     ++tick;
 
     point.position_ = light_pos1 + lp;
-    point.model_.position_ = light_pos1 + lp;
+    point.getModelPosition() = light_pos1 + lp;
 }
 
 int main(const int argc, const char** argv) {

@@ -1,17 +1,17 @@
 #include "camera.hpp"
 
 ThreeDL::Camera::Camera(const vec3& position, const vec3& rotation)
-    :   position_(position),
-        rotation_(rotation),
-        fov_(75)
+    :   position_{position},
+        rotation_{rotation},
+        fov_{75}
 {
     recalculateVectors();
 }
 
 ThreeDL::Camera::Camera(const ThreeDL::vec3& position, const ThreeDL::vec3& rotation, const float fov)
-    :   position_(position),
-        rotation_(rotation),
-        fov_(fov)
+    :   position_{position},
+        rotation_{rotation},
+        fov_{fov}
 {
     recalculateVectors();
 }
@@ -70,10 +70,10 @@ void ThreeDL::CameraController::tick() {
     const uint8_t* keys = SDL_GetKeyboardState(nullptr);
 
     if (rotation_enabled_) {
-        SDL_GetMouseState(&mouse_x_, &mouse_y_);
+        SDL_GetMouseState(&mouse_pos_.x, &mouse_pos_.y);
 
-        const int posx = mouse_x_ - screen_centre_.x;
-        const int posy = mouse_y_ - screen_centre_.y;
+        const int posx = mouse_pos_.x - screen_centre_.x;
+        const int posy = mouse_pos_.y - screen_centre_.y;
         const auto deltax = static_cast<float>(posx - prev_mouse_pos_.x);
         const auto deltay = static_cast<float>(posy - prev_mouse_pos_.y);
 

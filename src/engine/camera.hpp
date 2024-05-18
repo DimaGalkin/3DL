@@ -1,80 +1,72 @@
 #pragma once
 
 #include <SDL2/SDL.h>
-
 #include <cmath>
+
+#include "utils.hpp"
 
 // cpp & hpp included so linking templates doesn't fail
 #include "linalg.hpp"
 #include "linalg.cpp"
 
-#include "utils.hpp"
-
 namespace ThreeDL {
     /**
-     * @class Camera
-     * @breif Represents a camera in 3D space. Provides methods to transform the camera.
+     * Camera class encapsulates parameters used to render a seen from it's point of view. Camera class is passed
+     * to the renderer by reference so the user has the ability to change the camera classes parameters and see a
+     * live update of the scene.
+     *
+     * If changing position_ or rotation_ without the use of the helper functions, recalculateVectors() must be
+     * called to ensure that the forward_ and right_ vectors are correct.
+     * Maximum rotation values also have no effect if rotation_ is changed without the use of the helper functions.
     */
     class Camera {
         public:
-            /**
-             * @brief Creates a camera with a given position and rotation. Fov is set to default value.
-            */
             Camera(const vec3& position, const vec3& rotation);
-
-            /**
-             * @brief Creates a camera with a given position, rotation and field of view.
-            */
             Camera(const vec3& position, const vec3& rotation, const float fov);
-
-            /**
-             * @breif Do not allow camera to be created with blank parameters.
-            */
             Camera() = delete;
 
             /**
-             * @breif Recalculates the forward and right vectors based on the current rotation.
+             * Recalculates the forward_ and right_ vectors based on the current rotation_ values. These are unit
+             * vectors that represent the directions that the camera moves in.
+             * Must be called after changing rotation_ or position_. Methods of camera that change rotation_ or position_
+             * call this method automatically.
             */
             void recalculateVectors();
 
-    				/**
-						 * @breif Moves the camera forward by a given delta.
-						*/
+            /**
+             * Moves camera forward in the direction forward_ by delta units. Negative delta can be used to move the
+             * camera backwards.
+            */
             void moveForward(const float delta);
 
-            /**
-             * @brief Moves the camera to the right by a given delta.
-            */
+    				/**
+						 * Moves camera right in the direction right_ by delta units. Negative delta can be used to move the
+						 * camera to the left.
+						*/
             void moveRight(const float delta);
 
-    				/**
-						 * @brief Rotates the camera by a given angle. (Euler angles given in degrees)
-						*/
-            void rotate(const vec3 &delta);
-
-    				/**
-						 * @brief Pans the camera by a given angle given in degrees.
-						*/
-    				void tilt(const float delta);
+            /**
+             * Rotates the camera in a specified rotation order (see linalg.hpp) by delta degrees. vec3 of delta
+             * represnts a set of Euler angles.
+            */
+            void rotate(const vec3& delta);
 
             /**
-             * @brief Rolls the camera by a given angle given in degrees.
+             * Tilt, pan and roll are used to rotate the camera in a specific direction by delta degrees. Negative delta
+             * can be used to acomplish an opposite rotation.
             */
-            void pan(const float delta);
+            void tilt(const float delta); // tilt is rotation around the y axis
+            void pan(const float delta); // pan is rotation around the x axis
+            void roll(const float delta); // roll is rotation around the z axis
 
-    				/**
-						 * @brief Rolls the camera by a given angle given in degrees.
-						*/
-            void roll(const float delta);
-
-				    vec3 position_; // position of the camera in 3D space
-				    vec3 rotation_; // rotation of the camera in 3D space (Euler angles)
+				    vec3 position_;
+				    vec3 rotation_; // Euler angles in degrees
 
 				    // unit vectors representing direction camera moves in
-				    vec3 forward_; // direction the camera is facing
-				    vec3 right_; // direction to the right of the camera
+				    vec3 forward_;
+				    vec3 right_;
 
-				    float fov_; // field of view of the camera (in degrees)
+				    float fov_; // field of view of the camera (in degrees 0 < fov < 180)
 
             ~Camera() = default;
 
@@ -83,47 +75,36 @@ namespace ThreeDL {
     };
 
     /**
-     * @class CameraController
-     * @brief Provides a way to control a camera using mouse and keyboard input.
+     * CameraController class provides a way to control a camera object. CameraController used SDL2 to get mouse and
+     * keyboard input which subsequently moves the camera. CameraController can take a reference to a camera object
+     * so the user can control an existing camera or on can be created if the user chooses to not provide one.
     */
     class CameraController {
         public:
-				    /**
-				     * @brief Creates a controller for a given camera. Used when user requires to control an existing camera.
-				    */
 						explicit CameraController(Camera& camera);
-
-				    /**
-				     * @brief Creates a controller for a new camera. Used when user requires to create a new camera.
-    				*/
 				    CameraController(const vec3& position, const vec3& rotation, const float fov);
-
-				    /**
-				     * @breif Do not allow camera controller to be created with blank parameters.
-				    */
 				    CameraController() = delete;
 
-				    /**
-				     * @brief Called to update camera parameters from user input. Should be called every millisecond by user.
-				    */
-				    void tick();
+						/**
+						 * Tick takes user input and applies neccessary transformations to the camera object. It is recomened to
+						 * call this method multiple times per frame to ensure smooth camera movement.
+						*/
+						void tick();
 
-				    /**
-				     * @brief Translates the camera by a given delta.
-				    */
-				    void translate(const vec3& delta) const;
-
-				    /**
-				     * @brief Rotates the camera by a given delta. (Uses Euler angles in degrees.)
-				    */
+						/**
+						 * Translate and rotate are used to provide a quick way to move the camera without being required to retrive
+						 * the reference. obj.translate(x, y, z) is the same as obj.getCamera().translate(x, y, z).
+						*/
+						void translate(const vec3& delta) const;
 				    void rotate(const vec3& delta) const;
 
-				    /**
-				     * @brief Returns the camera being controlled by the controller.
-				    */
-				    Camera& getCamera() const { return camera_; }
+						/**
+						 * Retrives reference that the user passed to the CameraController in the constructor. If the user did not
+						 * pass a reference the one of the internal camera object is returned.
+						*/
+						Camera& getCamera() const { return camera_; }
 
-    				// previous mouse position
+    				// mouse position when camera controller was last ticked
     				ThreeDL::vec2i prev_mouse_pos_ = {0, 0};
 
     				// screen centre coordinates (to get mouse displacment from centre)
@@ -144,11 +125,10 @@ namespace ThreeDL {
             Camera internal_camera_ = Camera {
                     {0, 0, 0},
                     {0, 0, 0},
-                    36
+                    75
             };
 
     				// current mouse position
-            int mouse_x_ = 0;
-            int mouse_y_ = 0;
+            ThreeDL::vec2i mouse_pos_ = {0, 0};
     };
 };

@@ -76,7 +76,7 @@ void ThreeDL::Renderer::renderGUIWindows(uint64_t fps) {
                 ImGui::Text("No Lights available!");
             } else {
                 for (auto &light: lights_) {
-                    if (ImGui::MenuItem(light->name_.c_str())) {
+                    if (ImGui::MenuItem(light->getName().c_str())) {
                         selected_light_ = light;
                     }
                 }
@@ -148,9 +148,9 @@ void ThreeDL::Renderer::renderGUIWindows(uint64_t fps) {
     if (lights_.empty()) {
         ImGui::Text("Nothing to show here!");
     } else if (selected_light_ != nullptr) {
-        ImGui::Text("Selected Light: %s", selected_light_->name_.c_str());
+        ImGui::Text("Selected Light: %s", selected_light_->getName().c_str());
 
-        if (selected_light_->type_ == LightType::POINT) {
+        if (selected_light_->getType() == LightType::POINT) {
             ImGui::Text("Light Type: Point");
         } else {
             ImGui::Text("Light Type: Ambient");
@@ -168,7 +168,7 @@ void ThreeDL::Renderer::renderGUIWindows(uint64_t fps) {
 
         ImGui::Text("Light Intensity: %f", selected_light_->intensity_);
 
-        if (selected_light_->type_ == LightType::AMBIENT) {
+        if (selected_light_->getType() == LightType::AMBIENT) {
             ImGui::SliderFloat("Intensity", &selected_light_->intensity_, 0, 1);
         } else {
             ImGui::SliderFloat("Intensity", &selected_light_->intensity_, 0, 100000);
@@ -412,11 +412,11 @@ void ThreeDL::Renderer::render() {
         }
 
         for (const auto& light : lights_) {
-            if ((light->type_ != LightType::POINT && light->type_ != LightType::DIRECTIONAL) || !light->model_enabled_) continue;
+            if ((light->getType() != LightType::POINT && light->getType() != LightType::DIRECTIONAL) || !light->model_enabled_) continue;
 
             render_mutex_.lock();
 
-            Object model = light->model_;
+            Object model = light->getModel();
             if (model.texture_w_ == 1 && model.texture_h_ == 1) {
                 model.texture_[0] = Utils::linearToUint(light->color_[0], light->color_[1], light->color_[2]);
             }

@@ -50,11 +50,11 @@ template <class vT_>
 void ThreeDL::Vec3<vT_>::rotateY(const float angle) {
     const float radians = static_cast<float>(angle * M_PI) / 180.0f;
 
-    const vT_ x_g = static_cast<float>(x * cos(radians)) + static_cast<float>(z * sin(radians));
-    const vT_ z_g = static_cast<float>(-x * sin(radians)) + static_cast<float>(z * cos(radians));
+    const vT_ x_t = static_cast<float>(x * cos(radians)) + static_cast<float>(z * sin(radians));
+    const vT_ z_t = static_cast<float>(-x * sin(radians)) + static_cast<float>(z * cos(radians));
 
-    x = x_g;
-    z = z_g;
+    x = x_t;
+    z = z_t;
 }
 
 template <class vT_>
