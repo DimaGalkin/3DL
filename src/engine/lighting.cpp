@@ -7,7 +7,7 @@ ThreeDL::Light::Light()
       intensity_ {0},
       name_ {"default"},
       color_ {0, 0, 0},
-      fov_ {75}
+      fov_ { 75 }
 {}
 
 GPULight ThreeDL::Light::asGPUType() const {
@@ -37,7 +37,7 @@ ThreeDL::PointLight::PointLight(const std::string& name, const vec3& position, c
     type_ = LightType::POINT;
     position_ = position;
     intensity_ = intensity;
-    model_ =  Object("src/light.obj", FILEFORMAT::OBJ, color);
+    model_ =  Object("../light.obj", FILEFORMAT::OBJ, color);
 
     Utils::uintToLinear(color, color_);
 }
@@ -49,7 +49,7 @@ ThreeDL::DirectionalLight::DirectionalLight(const std::string& name, const vec3&
     position_ = position;
     intensity_ = intensity;
     fov_ = fov;
-    model_ = Object("src/light.obj", FILEFORMAT::OBJ, color);
+    model_ = Object("../light.obj", FILEFORMAT::OBJ, color);
 
     Utils::uintToLinear(color, color_);
 }

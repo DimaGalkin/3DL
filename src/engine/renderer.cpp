@@ -1,9 +1,9 @@
 #include "renderer.hpp"
 
 ThreeDL::Renderer::Renderer(
-        ThreeDL::Camera &camera,
-        const uint32_t width,
-        const uint32_t height
+    ThreeDL::Camera &camera,
+    const uint32_t width,
+    const uint32_t height
 ) : width_(width),
     height_(height),
     camera_(camera),
@@ -13,9 +13,9 @@ ThreeDL::Renderer::Renderer(
 }
 
 ThreeDL::Renderer::Renderer(
-        ThreeDL::CameraController& controller,
-        const uint32_t width,
-        const uint32_t height
+    ThreeDL::CameraController& controller,
+    const uint32_t width,
+    const uint32_t height
 ) : width_(width),
     height_(height),
     camera_(controller.getCamera()),
@@ -30,6 +30,7 @@ ThreeDL::Renderer::Renderer(
 
 void ThreeDL::Renderer::init() {
     SDL_Init(SDL_INIT_VIDEO);
+    SDL_SetWindowResizable(window_, SDL_TRUE);
     SDL_CreateWindowAndRenderer(width_, height_, 0, &window_, &renderer_);
     SDL_SetWindowTitle(window_, "3DL");
 
@@ -428,8 +429,11 @@ void ThreeDL::Renderer::render() {
             renderObject(model, gpu_render);
         }
 
+        cl::NDRange frag_global_ws {width_, height_};
+        cl::NDRange frag_local_ws {16};
+
         gpu_fragment(
-            cl::EnqueueArgs(ocl_utils_.queue_, cl::NDRange(width_ * height_)),
+            cl::EnqueueArgs(ocl_utils_.queue_, frag_global_ws, frag_local_ws),
             tri_store_buffer_,
             t_buffer_,
             texture_buffer_,
@@ -440,8 +444,6 @@ void ThreeDL::Renderer::render() {
             specular_buffer_,
             state_buffer_
         );
-
-        cl::NDRange global {width_ * height_};
 
         bool first = true;
         cl::Buffer shadow_map;
@@ -483,8 +485,6 @@ void ThreeDL::Renderer::render() {
                 );
 
                 for (const auto &object: render_queue_) {
-                    cl::NDRange dims {object->triangles_.size()};
-
                     cl::Buffer tris = cl::Buffer(
                             ocl_utils_.context_,
                             CL_MEM_READ_WRITE,
@@ -499,8 +499,11 @@ void ThreeDL::Renderer::render() {
                             object->triangles_.data()
                     );
 
+                    cl::NDRange shdw_global_ws {object->triangles_.size()};
+                    cl::NDRange shdw_local_ws {128};
+
                     gpu_shadow(
-                            cl::EnqueueArgs(ocl_utils_.queue_, dims),
+                            cl::EnqueueArgs(ocl_utils_.queue_, shdw_global_ws, shdw_local_ws),
                             tris,
                             shadow_map,
                             light_buffer,
@@ -510,8 +513,11 @@ void ThreeDL::Renderer::render() {
                 }
             }
 
+            cl::NDRange light_global_ws {width_, height_};
+            cl::NDRange light_local_ws {16};
+
             gpu_lighting(
-                    cl::EnqueueArgs(ocl_utils_.queue_, global),
+                    cl::EnqueueArgs(ocl_utils_.queue_, light_global_ws, light_local_ws),
                     pixels_buffer_,
                     shadow_map,
                     color_buffer_,
@@ -601,10 +607,11 @@ void ThreeDL::Renderer::renderObject(const ThreeDL::Object& object, gpu_render_p
         &state_
     );
 
-    cl::NDRange global {object.triangles_.size()};
+    cl::NDRange global {(cl::size_type)std::pow(object.triangles_.size(), 1.0f/3.0f), (cl::size_type)std::pow(object.triangles_.size(), 1.0f/3.0f), (cl::size_type)std::pow(object.triangles_.size(), 1.0f/3.0f)};
+    cl::NDRange local {2};
 
     gpu_render (
-        cl::EnqueueArgs(ocl_utils_.queue_, global),
+        cl::EnqueueArgs(ocl_utils_.queue_, global, local),
         triangles_buffer_,
         tri_store_buffer_,
         t_buffer_,

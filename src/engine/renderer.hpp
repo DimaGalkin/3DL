@@ -53,13 +53,13 @@ namespace ThreeDL {
              * @method Renderer Constructor
              * @brief This constructor takes a reference to a camera, not const as renderer may adjust internal values.
             */
-            Renderer(Camera& camera, const uint32_t width, const uint32_t height);
+            Renderer(Camera& camera, uint32_t width, uint32_t height);
 
             /**
               * @method Renderer Constructor
               * @brief This constructor takes a reference to a camera controller, this will extract the camera reference from the controller.
             */
-            Renderer(CameraController& controller, const uint32_t width, const uint32_t height);
+            Renderer(CameraController& controller, uint32_t width, uint32_t height);
 
             // Need camera and size info
             Renderer() = delete;

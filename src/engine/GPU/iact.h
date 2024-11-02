@@ -1070,7 +1070,7 @@ bool backfacecull(const struct Triangle* tr) {
 
 void rasterise_shadow(
     struct ScreenTriangle* tri,
-    struct State* info,
+    global struct State* info,
     const struct GPULight* light,
     global float* zbuffer,
     global float* shadow_map
@@ -1208,19 +1208,25 @@ void kernel gpu_shadow (
     global const struct State* info,
     global const float* zbuffer
 ) {
-    const int tri_num = get_global_id(0);
+    const int zero = get_global_id(0);
+    const int one = get_global_id(1);
+    const int two = get_global_id(2);
+
+    const int tri_num = get_global_offset(0) + zero + get_global_size(0) * one + get_global_size(0) * get_global_size(1) * two;
 
     struct Triangle tri_cpy = tris[tri_num];
 
     struct Vector3 light_rotation = {90, 0, 0};
 
+    struct GPULight light = *light_ptr;
+
     // Vec3Add(&tri_cpy.v1, &info->model_position_, &tri_cpy.v1);
     // Vec3Add(&tri_cpy.v2, &info->model_position_, &tri_cpy.v2);
     // Vec3Add(&tri_cpy.v3, &info->model_position_, &tri_cpy.v3);
 
-    Vec3Subtract(&tri_cpy.v1, &light_ptr->position_, &tri_cpy.v1);
-    Vec3Subtract(&tri_cpy.v2, &light_ptr->position_, &tri_cpy.v2);
-    Vec3Subtract(&tri_cpy.v3, &light_ptr->position_, &tri_cpy.v3);
+    Vec3Subtract(&tri_cpy.v1, &light.position_, &tri_cpy.v1);
+    Vec3Subtract(&tri_cpy.v2, &light.position_, &tri_cpy.v2);
+    Vec3Subtract(&tri_cpy.v3, &light.position_, &tri_cpy.v3);
 
     Vec3Rotate(&tri_cpy.v1, &light_rotation);
     Vec3Rotate(&tri_cpy.v2, &light_rotation);
@@ -1315,8 +1321,8 @@ void kernel gpu_shadow (
 
                     for (int m = 0; m < top_clipped; ++m) {
                         struct ScreenTriangle tri_screen;
-                        projectshadow(&tri_top_clipped[m], &tri_screen, light_ptr);
-                        rasterise_shadow(&tri_screen, info, light_ptr, zbuffer, shadow_map);
+                        projectshadow(&tri_top_clipped[m], &tri_screen, &light);
+                        rasterise_shadow(&tri_screen, info, &light, zbuffer, shadow_map);
                     }
                 }
             }
@@ -1389,7 +1395,7 @@ void rotateAboutAxis(
 void toCameraSpace(
     struct Vector3* in,
     struct Vector3* out,
-    const struct State* info
+    global const struct State* info
 ) {
     struct Vector3 camera_pos = info->camera_position_;
     struct Vector3 camera_rot = info->camera_rotation_;
@@ -1435,11 +1441,17 @@ void kernel gpu_lighting (
     global struct Vector3* positions,
     global const float* zbuffer
 ) {
-    const int pixel_num = get_global_id(0);
+    const int zero = get_global_id(0);
+    const int one = get_global_id(1);
+    const int two = get_global_id(2);
+
+    const int pixel_num = get_global_offset(0) + zero + get_global_size(0) * one + get_global_size(0) * get_global_size(1) * two;
 
     if (zbuffer[pixel_num] == -INFINITY) return;
 
     const uint pixel = C[pixel_num];
+
+    struct State inf = *info;
 
     float pixel_r = (float)((pixel & 0xff0000) >> 16) / 255.0;
     float pixel_g = (float)((pixel & 0xff00) >> 8) / 255.0;
@@ -1500,7 +1512,7 @@ void kernel gpu_lighting (
         rotateAboutAxis(&p, &axis, angles.x, &p);
         rotateAboutAxis(&p, &axis, angles.z, &p);
 
-        projectvertex(&p, &projected, light_ptr);
+        projectvertex(&p, &projected, &light);
 
         if (!vertexInCone(&light_dir, &p, light.fov_)) {
             return;
@@ -1517,8 +1529,8 @@ void kernel gpu_lighting (
             }
         }
 
-        Vec3Subtract(&light.position_, &info->camera_position_, &light.position_);
-        Vec3Rotate(&light.position_, &info->camera_rotation_);
+        Vec3Subtract(&light.position_, &inf.camera_position_, &light.position_);
+        Vec3Rotate(&light.position_, &inf.camera_rotation_);
 
         Vec3Subtract(&position, &light.position_, &light_dir);
         distance = Vec3Length(&light_dir);
@@ -1599,7 +1611,7 @@ void Vec2ConvertCoords(
 void draw(
     struct ScreenTriangle* tri,
     struct Triangle* gsp_tri,
-    float* zbuffer,
+    global float* zbuffer,
     global uint* texture,
     global struct TriangleStore* B,
     global struct Vector3* Ts,
@@ -1788,9 +1800,15 @@ kernel void gpu_fragment(
     global uint* specularColors,
     global const struct State* info
 ) {
-    const int pixel_num = get_global_id(0);
+    // get id of the current triangle in 3 dimensions
+    const int zero = get_global_id(0);
+    const int one = get_global_id(1);
+    const int two = get_global_id(2);
 
-    struct TriangleStore* tri = &B[pixel_num];
+    const int pixel_num = get_global_offset(0) + zero + get_global_size(0) * one + get_global_size(0) * get_global_size(1) * two;
+
+    const struct TriangleStore Blocal = B[pixel_num];
+    struct TriangleStore* tri = &Blocal;
 
     if (!tri->valid_) return;
     struct Vector3 ts = Ts[pixel_num];
@@ -1848,17 +1866,19 @@ kernel void gpu_render (
     struct Vector3 posv2 = tri_cpy.v2;
     struct Vector3 posv3 = tri_cpy.v3;
 
-    Vec3Subtract(&tri_cpy.v1, &info->camera_position_, &tri_cpy.v1);
-    Vec3Subtract(&tri_cpy.v2, &info->camera_position_, &tri_cpy.v2);
-    Vec3Subtract(&tri_cpy.v3, &info->camera_position_, &tri_cpy.v3);
+    struct State inf = *info;
 
-    Vec3Rotate(&tri_cpy.v1, &info->camera_rotation_);
-    Vec3Rotate(&tri_cpy.v2, &info->camera_rotation_);
-    Vec3Rotate(&tri_cpy.v3, &info->camera_rotation_);
+    Vec3Subtract(&tri_cpy.v1, &inf.camera_position_, &tri_cpy.v1);
+    Vec3Subtract(&tri_cpy.v2, &inf.camera_position_, &tri_cpy.v2);
+    Vec3Subtract(&tri_cpy.v3, &inf.camera_position_, &tri_cpy.v3);
 
-    Vec3Rotate(&tri_cpy.n1, &info->camera_rotation_);
-    Vec3Rotate(&tri_cpy.n2, &info->camera_rotation_);
-    Vec3Rotate(&tri_cpy.n3, &info->camera_rotation_);
+    Vec3Rotate(&tri_cpy.v1, &inf.camera_rotation_);
+    Vec3Rotate(&tri_cpy.v2, &inf.camera_rotation_);
+    Vec3Rotate(&tri_cpy.v3, &inf.camera_rotation_);
+
+    Vec3Rotate(&tri_cpy.n1, &inf.camera_rotation_);
+    Vec3Rotate(&tri_cpy.n2, &inf.camera_rotation_);
+    Vec3Rotate(&tri_cpy.n3, &inf.camera_rotation_);
 
     if (backfacecull(&tri_cpy)) return;
 
@@ -1951,7 +1971,7 @@ kernel void gpu_render (
                         project(&tri_top_clipped[m], &tri_projected, info);
 
                         if (info->mode_ == WIREFRAME) {
-                            drawWireframeTriangle(&tri_projected, info, pixels);
+                            drawWireframeTriangle(&tri_projected, &inf, pixels);
                             continue;
                         }
 

@@ -55,19 +55,9 @@ namespace ThreeDL {
             void fillTriangleBuffer(const std::string& model_path, const FILEFORMAT format);
     };
 
-    class Mesh {
-        public:
-            Mesh() = default;
-
-            ~Mesh() = default;
-        private:
-    };
-
     class OBJLoader {
         public:
             OBJLoader() = delete;
-
-            // add support for mtl files
 
             static std::vector<Triangle> load(const std::string& path);
 

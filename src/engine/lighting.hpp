@@ -12,47 +12,47 @@ namespace ThreeDL {
     */
     class Light {
         public:
-					Light();
+			Light();
 
-					/**
-					 * Exports the member variables of the class into a struct that is defined in GPU/types.h.
-					*/
-					GPULight asGPUType() const;
+			/**
+			 * Exports the member variables of the class into a struct that is defined in GPU/types.h.
+			*/
+			GPULight asGPUType() const;
 
-					/**
-					 * Returns the reference to the position of the model so that it may be changed by the user.
-					*/
-					ThreeDL::vec3& getModelPosition() { return model_.position_; }
+			/**
+			 * Returns the reference to the position of the model so that it may be changed by the user.
+			*/
+			ThreeDL::vec3& getModelPosition() { return model_.position_; }
 
-					/**
-					 * Returns values restrict the user from being able to change protected values. Changing these
-					 * values will result in undefined behavior.
-					*/
-					std::string getName() const { return name_; }
-					LightType getType() const { return type_; }
-					Object getModel() const { return model_; }
+			/**
+			 * Returns values restrict the user from being able to change protected values. Changing these
+			 * values will result in undefined behavior.
+			*/
+			std::string getName() const { return name_; }
+			LightType getType() const { return type_; }
+			Object getModel() const { return model_; }
 
-					vec3 position_;
-					vec3 direction_; // direction vector of light
+			vec3 position_;
+			vec3 direction_; // direction vector of light
 
-					bool model_enabled_ = true;
+			bool model_enabled_ = true;
 
-					float intensity_;
-					float color_[3]; // RGB color of light
-					float fov_; // field of view of light in degrees
+			float intensity_;
+			float color_[3]; // RGB color of light
+			float fov_; // field of view of light in degrees
 
-					bool shadows_enabled_ = true;
-					uint32_t shadowmap_w_ = 1024;
-					uint32_t shadowmap_h_ = 1024;
+			bool shadows_enabled_ = true;
+			uint32_t shadowmap_w_ = 1024;
+			uint32_t shadowmap_h_ = 1024;
 
-					~Light() = default;
+			~Light() = default;
 
         protected:
-		        Object model_; // stores the model of the light source
+	        Object model_; // stores the model of the light source
 
-		        std::string name_; // name of light to make it identifiable in the GUI
+	        std::string name_; // name of light to make it identifiable in the GUI
 
-		        LightType type_; // Directional, Point, Ambient
+	        LightType type_; // Directional, Point, Ambient
     };
 
     /**
@@ -61,7 +61,7 @@ namespace ThreeDL {
     */
     class AmbientLight : public Light {
         public:
-            AmbientLight(const std::string& name, const uint32_t color, const float intensity);
+            AmbientLight(const std::string& name, uint32_t color, float intensity);
             AmbientLight() = delete;
 
             ~AmbientLight() = default;
@@ -73,7 +73,7 @@ namespace ThreeDL {
     */
     class PointLight : public Light {
         public:
-            PointLight(const std::string& name, const vec3& position, const uint32_t color, const float intensity);
+            PointLight(const std::string& name, const vec3& position, uint32_t color, float intensity);
             PointLight() = delete;
 
             ~PointLight() = default;
@@ -85,7 +85,7 @@ namespace ThreeDL {
 		*/
     class DirectionalLight : public Light {
         public:
-            DirectionalLight(const std::string& name, const vec3& direction, const vec3& position, const float fov, const uint32_t color, const float intensity);
+            DirectionalLight(const std::string& name, const vec3& direction, const vec3& position, float fov, uint32_t color, float intensity);
             DirectionalLight() = delete;
 
             ~DirectionalLight() = default;

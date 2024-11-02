@@ -7,15 +7,15 @@ ThreeDL::CameraController controller (
         ThreeDL::vec3 {0, 90, 0},
         75
 );
-ThreeDL::Renderer renderer (controller, 1920, 1080);
+ThreeDL::Renderer renderer (controller, 1280, 720);
 
 ThreeDL::Object plane (
-        "src/MiG-29.obj",
+        "../F15.obj",
         ThreeDL::FILEFORMAT::OBJ,
-        "src/MIG-29.png"
+        "../BaseColor.png"
 );
 
-ThreeDL::vec3 light_pos1 {plane.centre_.x, plane.centre_.y + 50, plane.centre_.z};
+ThreeDL::vec3 light_pos1 { plane.centre_.x, plane.centre_.y + 50, plane.centre_.z };
 
 ThreeDL::AmbientLight ambient (
         "ambient",

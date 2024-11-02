@@ -8,7 +8,7 @@ ThreeDL::Camera::Camera(const vec3& position, const vec3& rotation)
     recalculateVectors();
 }
 
-ThreeDL::Camera::Camera(const ThreeDL::vec3& position, const ThreeDL::vec3& rotation, const float fov)
+ThreeDL::Camera::Camera(const vec3& position, const vec3& rotation, const float fov)
     :   position_{position},
         rotation_{rotation},
         fov_{fov}
@@ -58,7 +58,11 @@ void ThreeDL::Camera::roll(const float delta) {
 
 ThreeDL::CameraController::CameraController(Camera& camera)
         : camera_ {camera},
-          internal_camera_ {{0, 0, 0}, {0, 0, 0}, 0} // populate with dummy values
+          internal_camera_ {
+              {0, 0, 0},
+              {0, 0, 0},
+              0
+          } // populate with dummy values
 {}
 
 ThreeDL::CameraController::CameraController(const vec3& position, const vec3& rotation, const float fov)
