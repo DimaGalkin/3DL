@@ -36,7 +36,7 @@ namespace ThreeDL {
             cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer
     >;
     using gpu_shadow_program = cl::compatibility::make_kernel<
-            cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer
+            cl::Buffer, cl::Buffer, cl::Buffer
     >;
     using gpu_fragment_program = cl::compatibility::make_kernel<
             cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer,

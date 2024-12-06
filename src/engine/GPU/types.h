@@ -1,143 +1,143 @@
 #ifndef MATHCL
 #define MATHCL
 
-#ifndef uint32_t
-typedef unsigned int uint32_t;
+#ifdef __cplusplus
+#include <cstdint>
 #endif
 
-enum LightType {
+typedef enum LightType {
     UNINITIALIZED,
     AMBIENT,
     POINT,
     DIRECTIONAL
-};
+} LightType;
 
-enum RENDERMODE {
+typedef enum RENDERMODE {
     WIREFRAME,
     WIREFRAME_OVERLAY,
     SHADED
-};
+} RENDERMODE;
 
-struct Vector2 {
+typedef struct Vector2 {
     float x;
     float y;
 
     float depth_info_;
-};
+} Vector2;
 
-struct Vector3 {
+typedef struct Vector3 {
     float x;
     float y;
     float z;
     float w;
-};
+} Vector3;
 
-struct State {
-    enum RENDERMODE mode_;
+typedef struct State {
+    RENDERMODE mode_;
 
-    struct Vector3 camera_position_;
-    struct Vector3 camera_rotation_;
+    Vector3 camera_position_;
+    Vector3 camera_rotation_;
     float fov_;
 
-    struct Vector3 model_position_;
+    Vector3 model_position_;
 
-    uint32_t width_;
-    uint32_t height_;
-    uint32_t texture_width_;
-    uint32_t texture_height_;
+    unsigned int width_;
+    unsigned int height_;
+    unsigned int texture_width_;
+    unsigned int texture_height_;
 
-    uint32_t num_lights_;
-};
+    unsigned int num_lights_;
+} State;
 
-struct TriangleStore {
-    struct Vector2 v1;
-    struct Vector2 v2;
-    struct Vector2 v3;
+typedef struct TriangleStore {
+    Vector2 v1;
+    Vector2 v2;
+    Vector2 v3;
 
-    uint32_t texture_;
+    unsigned int texture_;
 
-    struct Vector3 n1;
-    struct Vector3 n2;
-    struct Vector3 n3;
+    Vector3 n1;
+    Vector3 n2;
+    Vector3 n3;
 
-    struct Vector3 v1_;
-    struct Vector3 v2_;
-    struct Vector3 v3_;
+    Vector3 v1_;
+    Vector3 v2_;
+    Vector3 v3_;
 
-    uint32_t diffuse_color_;
-    uint32_t specular_color_;
+    unsigned int diffuse_color_;
+    unsigned int specular_color_;
 
     bool valid_;
     bool top_;
     bool swap_;
-};
+} TriangleStore;
 
-struct Triangle {
-    struct Vector3 v1;
-    struct Vector3 v2;
-    struct Vector3 v3;
+typedef struct Triangle {
+    Vector3 v1;
+    Vector3 v2;
+    Vector3 v3;
 
-    struct Vector2 t1;
-    struct Vector2 t2;
-    struct Vector2 t3;
+    Vector2 t1;
+    Vector2 t2;
+    Vector2 t3;
 
-    struct Vector3 n1;
-    struct Vector3 n2;
-    struct Vector3 n3;
+    Vector3 n1;
+    Vector3 n2;
+    Vector3 n3;
 
-    uint32_t diffuse_color_;
-    uint32_t specular_color_;
+    unsigned int diffuse_color_;
+    unsigned int specular_color_;
 
     float shininess_;
-};
+} Triangle;
 
-struct ScreenTriangle {
-    struct Vector2 v1;
-    struct Vector2 v2;
-    struct Vector2 v3;
+typedef struct ScreenTriangle {
+    Vector2 v1;
+    Vector2 v2;
+    Vector2 v3;
 
-    struct Vector2 t1;
-    struct Vector2 t2;
-    struct Vector2 t3;
-};
+    Vector2 t1;
+    Vector2 t2;
+    Vector2 t3;
+} ScreenTriangle;
 
-struct IntersectInfo {
-    struct Vector3 intersect_;
+typedef struct IntersectInfo {
+    Vector3 intersect_;
     bool valid_;
     float t_;
-};
+} IntersectInfo;
 
-struct Ray {
-    struct Vector3 origin_;
-    struct Vector3 direction_;
-};
+typedef struct Ray {
+    Vector3 origin_;
+    Vector3 direction_;
+} Ray;
 
-struct Plane {
-    struct Vector3 normal_;
-    struct Vector3 position_;
-    struct Vector3 direction_;
-};
+typedef struct Plane {
+    Vector3 normal_;
+    Vector3 position_;
+    Vector3 direction_;
+} Plane;
 
-struct Line {
-    struct Vector2 a;
-    struct Vector2 b;
-};
+typedef struct Line {
+    Vector2 a;
+    Vector2 b;
+} Line;
 
-struct GPULight {
-    enum LightType type_;
+typedef struct GPULight {
+    LightType type_;
 
-    struct Vector3 position_;
-    struct Vector3 direction_;
+    Vector3 position_;
+    Vector3 direction_;
 
     bool shadows_enabled_;
-    uint32_t shadow_map_width_;
-    uint32_t shadow_map_height_;
+    unsigned int shadow_map_width_;
+    unsigned int shadow_map_height_;
 
     float fov_;
 
-    uint32_t color_;
+    unsigned int color_;
 
     float intensity_;
-};
+} GPULight;
 
 #endif

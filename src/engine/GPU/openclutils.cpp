@@ -9,8 +9,34 @@ ThreeDL::OpenCLUtils::OpenCLUtils() {
         throw std::runtime_error("No OpenCL platforms found");
     }
 
+    int plat_num { 0 };
+    int dev_num { 0 };
+
+    for (const auto& platform : platforms_) {
+        platform.getDevices(CL_DEVICE_TYPE_ALL, &devices_);
+        std::cout << "[" << plat_num << "] Platform: " << platform.getInfo<CL_PLATFORM_NAME>() << std::endl;
+        for (const auto& device : devices_) {
+            std::cout << "  - [" << dev_num << "] Device: " << device.getInfo<CL_DEVICE_NAME>() << std::endl;
+            ++dev_num;
+        }
+
+        ++plat_num;
+        dev_num = 0;
+        std::cout << std::endl;
+    }
+
+    std::cout << std::endl;
+
+    std::cout << "Enter Platform Number: ";
+    std::cin >> plat_num;
+    std::cout << "Enter Device Number: ";
+    std::cin >> dev_num;
+
+    std::cout << std::endl;
+
+
     // Select platform that contains required GPU
-    platform_ = platforms_[1];
+    platform_ = platforms_[plat_num];
     std::cout << "Using platform: " << platform_.getInfo<CL_PLATFORM_NAME>() << std::endl;
 
     // Get all devices held by a platform
@@ -20,7 +46,7 @@ ThreeDL::OpenCLUtils::OpenCLUtils() {
     }
 
     // Select GPU which will be used to render scene
-    device_ = devices_[0];
+    device_ = devices_[dev_num];
     std::cout << "Using device: " << device_.getInfo<CL_DEVICE_NAME>() << std::endl;
 
     // get mem size in GB

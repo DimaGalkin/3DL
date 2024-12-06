@@ -1,33 +1,42 @@
-# include at compile time script
+# library for detecting relative path
 import os
 
+# get path relative to path of compile script
 rel_path = os.path.dirname(__file__)
 
-file = open(f"{rel_path}/kernel.cl", "r")
-lines = file.read()
-file.close()
+# read gpu kernels and supporting functions
+cl_source = open(f"{rel_path}/kernel.c", "r")
+gpu_source_code = cl_source.read()
+cl_source.close()
 
-include1 = open(f"{rel_path}/mathcl.h", "r")
-lines = include1.read() + "\n" + lines
-include1.close()
+# load custom maths library
+math_cllib = open(f"{rel_path}/mathcl.h", "r")
+gpu_source_code = math_cllib.read() + "\n" + gpu_source_code
+math_cllib.close()
 
-include2 = open(f"{rel_path}/types.h", "r")
-lines = include2.read() + "\n" + lines
-include2.close()
+# load types defined for CPU - GPU interfacing
+typedefs = open(f"{rel_path}/types.h", "r")
+gpu_source_code = typedefs.read() + "\n" + gpu_source_code
+typedefs.close()
 
+# include guard and var name to read from cpp code
 header = """
 #ifndef __IACT_H__
 #define __IACT_H__
 const char* kernel_include_source = R"(
+#define __IACT_H__
 """
 
+# end include guard and string containing GPU code
 end = """
 )";
 #endif
 """
 
-lines = header + lines + end
+# concat three files into one include
+gpu_source_code = header + gpu_source_code + end
 
-file = open(f"{rel_path}/iact.h", "w")
-file.write(lines)
-file.close()
+# write single compile file out to be read by cpp
+out_gpu_source = open(f"{rel_path}/iact.h", "w")
+out_gpu_source.write(gpu_source_code)
+out_gpu_source.close()

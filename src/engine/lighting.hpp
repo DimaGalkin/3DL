@@ -22,7 +22,7 @@ namespace ThreeDL {
 			/**
 			 * Returns the reference to the position of the model so that it may be changed by the user.
 			*/
-			ThreeDL::vec3& getModelPosition() { return model_.position_; }
+			vec3& getModelPosition() { return model_.position_; }
 
 			/**
 			 * Returns values restrict the user from being able to change protected values. Changing these

@@ -281,32 +281,17 @@ void ThreeDL::Renderer::render() {
 
     std::cout << "Starting Kernel Compilation..." << std::endl;
 
-    cl::Program render_program = ocl_utils_.buildProgram(
-        "gpu_render",
-        "src/engine/GPU/kernel.cl"
-    );
-    cl::Program lighting_program = ocl_utils_.buildProgram(
-        "gpu_lighting",
-        "src/engine/GPU/kernel.cl"
-    );
-    cl::Program shadow_program = ocl_utils_.buildProgram(
-        "gpu_shadow",
-        "src/engine/GPU/kernel.cl"
-    );
-    cl::Program fragment_program = ocl_utils_.buildProgram(
-        "gpu_fragment",
-        "src/engine/GPU/kernel.cl"
-    );
+    const cl::Program ocl_program = ocl_utils_.buildProgram();
 
     std::cout << "Kernel Compilation Complete!" << std::endl;
 
-    gpu_render_program gpu_render (cl::Kernel(render_program, "gpu_render"));
-    gpu_lighting_program gpu_lighting (cl::Kernel(lighting_program, "gpu_lighting"));
-    gpu_shadow_program gpu_shadow (cl::Kernel(shadow_program, "gpu_shadow"));
-    gpu_fragment_program gpu_fragment (cl::Kernel(fragment_program, "gpu_fragment"));
+    gpu_render_program gpu_render (cl::Kernel(ocl_program, "gpu_render"));
+    gpu_lighting_program gpu_lighting (cl::Kernel(ocl_program, "gpu_lighting"));
+    gpu_shadow_program gpu_shadow (cl::Kernel(ocl_program, "gpu_shadow"));
+    gpu_fragment_program gpu_fragment (cl::Kernel(ocl_program, "gpu_fragment"));
 
     while (!client_quit_) {
-        bool show_gui = gui_enabled_;
+        const bool show_gui = gui_enabled_;
 
         pixels_buffer_ = cl::Buffer(
                 ocl_utils_.context_,
@@ -378,7 +363,7 @@ void ThreeDL::Renderer::render() {
             gpu_lights_.push_back(light->asGPUType());
         }
 
-        ocl_utils_.queue_.enqueueWriteBuffer(
+        ocl_utils_.queue_.enqueueWriteBuffer (
                 lights_buffer_,
                 CL_TRUE,
                 0,
@@ -386,7 +371,7 @@ void ThreeDL::Renderer::render() {
                 gpu_lights_.data()
         );
 
-        ocl_utils_.queue_.enqueueWriteBuffer(
+        ocl_utils_.queue_.enqueueWriteBuffer (
                 zbuffer_buffer_,
                 CL_TRUE,
                 0,
@@ -445,7 +430,6 @@ void ThreeDL::Renderer::render() {
             state_buffer_
         );
 
-        bool first = true;
         cl::Buffer shadow_map;
 
         std::vector<float> shadow_map_cpu;
@@ -486,9 +470,9 @@ void ThreeDL::Renderer::render() {
 
                 for (const auto &object: render_queue_) {
                     cl::Buffer tris = cl::Buffer(
-                            ocl_utils_.context_,
-                            CL_MEM_READ_WRITE,
-                            sizeof(Triangle) * object->triangles_.size()
+                        ocl_utils_.context_,
+                        CL_MEM_READ_WRITE,
+                        sizeof(Triangle) * object->triangles_.size()
                     );
 
                     ocl_utils_.queue_.enqueueWriteBuffer(
@@ -506,9 +490,7 @@ void ThreeDL::Renderer::render() {
                             cl::EnqueueArgs(ocl_utils_.queue_, shdw_global_ws, shdw_local_ws),
                             tris,
                             shadow_map,
-                            light_buffer,
-                            state_buffer_,
-                            zbuffer_buffer_
+                            light_buffer
                     ).wait();
                 }
             }
